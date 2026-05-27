@@ -1,0 +1,1542 @@
+import React from "react";
+import "../styles/styles.css";
+
+const PartTimeSalarySlip = () => {
+
+  /* =========================================
+     FORM DATA
+  ========================================= */
+
+  const [formData, setFormData] = React.useState({
+    empCode: "00020602",
+    empName: "Chiluveru Sinu Jangaonkar",
+    financialYear: "2025-2026",
+    month: "03/2017",
+  });
+
+  /* =========================================
+     MONTHS
+  ========================================= */
+
+  const months = [
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+  ];
+
+  /* =========================================
+     EARNINGS
+  ========================================= */
+
+  const [earnings, setEarnings] = React.useState([
+    { label: "Basic", amount: 58870.0 },
+    { label: "TG Incr", amount: 1570.0 },
+    { label: "VDA", amount: 70349.65 },
+    { label: "CCA", amount: 4120.9 },
+    { label: "Perks", amount: 25608.45 },
+    { label: "LPGVTAS", amount: 18.31 },
+    { label: "LPG Reim", amount: 471.5 },
+    { label: "iRRBPS I", amount: 187.0 },
+  ]);
+
+  /* =========================================
+     DEDUCTIONS
+  ========================================= */
+
+  const [deductions, setDeductions] = React.useState([
+    { label: "CMPF", amount: 14445.0 },
+    { label: "Ee FPS", amount: 1556.0 },
+    { label: "RBPS-2%", amount: 2584.0 },
+    { label: "Income Tax", amount: 48390.0 },
+  ]);
+
+  /* =========================================
+     DEDUCTION TYPES
+  ========================================= */
+
+  const mandatoryDeductions = [
+    "PF",
+    "Professional Tax",
+    "Income Tax",
+  ];
+
+  const personalDeductions = [
+    "LIC",
+    "Loan",
+    "Union Fee",
+  ];
+
+  /* =========================================
+     OTHER INCOME
+  ========================================= */
+
+  const otherIncomeHeads = [
+    "Part Time Job",
+    "Agriculture Income",
+    "LIC Commission",
+    "Business Income",
+    "Dividend",
+    "Rental Income",
+    "Freelancing",
+  ];
+
+  /* =========================================
+     CAPITAL RECEIPTS
+  ========================================= */
+
+  const capitalReceiptHeads = [
+    "Sale Of Property",
+    "Sale Of Land",
+    "Capital Gain",
+  ];
+
+  /* =========================================
+     ANNUAL DATA
+  ========================================= */
+
+  const [annualIncomeData, setAnnualIncomeData] =
+    React.useState(
+      months.map(() => ({
+        earnings: {},
+        mandatory: {},
+        personal: {},
+        otherIncome: {},
+        capitalReceipt: {},
+        taxExemption: {},
+      }))
+    );
+
+  /* =========================================
+     GROWTH YEARS
+  ========================================= */
+
+  const [growthYears, setGrowthYears] =
+    React.useState([
+      { year: "2021", income: 0 },
+      { year: "2022", income: 0 },
+      { year: "2023", income: 0 },
+      { year: "2024", income: 0 },
+      { year: "2025", income: 0 },
+    ]);
+
+  /* =========================================
+     HANDLERS
+  ========================================= */
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  /* =========================================
+     EARNINGS FUNCTIONS
+  ========================================= */
+
+  const handleEarningChange = (
+    index,
+    key,
+    value
+  ) => {
+    const updated = [...earnings];
+    updated[index][key] = value;
+    setEarnings(updated);
+  };
+
+  const addEarningField = () => {
+    setEarnings([
+      ...earnings,
+      { label: "", amount: 0 },
+    ]);
+  };
+
+  const removeEarningField = (index) => {
+    const updated = earnings.filter(
+      (_, i) => i !== index
+    );
+
+    setEarnings(updated);
+  };
+
+  /* =========================================
+     DEDUCTIONS FUNCTIONS
+  ========================================= */
+
+  const handleDeductionChange = (
+    index,
+    key,
+    value
+  ) => {
+    const updated = [...deductions];
+    updated[index][key] = value;
+    setDeductions(updated);
+  };
+
+  const addDeductionField = () => {
+    setDeductions([
+      ...deductions,
+      { label: "", amount: 0 },
+    ]);
+  };
+
+  const removeDeductionField = (index) => {
+    const updated = deductions.filter(
+      (_, i) => i !== index
+    );
+
+    setDeductions(updated);
+  };
+
+  /* =========================================
+     ANNUAL DATA CHANGE
+  ========================================= */
+
+  const handleAnnualDataChange = (
+    monthIndex,
+    category,
+    field,
+    value
+  ) => {
+    const updated = [...annualIncomeData];
+
+    updated[monthIndex][category][field] =
+      Number(value);
+
+    setAnnualIncomeData(updated);
+  };
+
+  /* =========================================
+     CALCULATIONS
+  ========================================= */
+
+  const grossEarnings = earnings.reduce(
+    (total, item) =>
+      total + Number(item.amount || 0),
+    0
+  );
+
+  const totalDeductions = deductions.reduce(
+    (total, item) =>
+      total + Number(item.amount || 0),
+    0
+  );
+
+  const netPay =
+    grossEarnings - totalDeductions;
+
+  /* =========================================
+     GROWTH RATE
+  ========================================= */
+
+  const calculateGrowthRate = () => {
+    const validYears = growthYears.filter(
+      (item) => Number(item.income) > 0
+    );
+
+    if (validYears.length < 2) return 0;
+
+    const firstIncome = Number(
+      validYears[0].income
+    );
+
+    const lastIncome = Number(
+      validYears[validYears.length - 1]
+        .income
+    );
+
+    const years = validYears.length - 1;
+
+    return (
+      ((lastIncome - firstIncome) /
+        firstIncome) *
+      (100 / years)
+    ).toFixed(2);
+  };
+
+  /* =========================================
+     LOCAL STORAGE
+  ========================================= */
+
+  // const handleSave = () => {
+  //   const data = {
+  //     formData,
+  //     earnings,
+  //     deductions,
+  //     annualIncomeData,
+  //     growthYears,
+  //   };
+
+  //   localStorage.setItem(
+  //     "salarySlipData",
+  //     JSON.stringify(data)
+  //   );
+
+  //   alert("Saved Successfully");
+  // };
+
+
+  const handleSave = () => {
+
+  /* =========================================
+     COPY SALARY SLIP DATA TO TABLE
+  ========================================= */
+
+  const updatedAnnualData = [...annualIncomeData];
+
+  // Find current month index
+  const currentMonth = formData.month;
+
+  // Example:
+  // if month = "Mar" OR "03/2017"
+  // you can customize this logic
+
+  let monthIndex = months.findIndex(
+    (m) =>
+      currentMonth.toLowerCase().includes(
+        m.toLowerCase()
+      )
+  );
+
+  // Default to first month if not found
+  if (monthIndex === -1) {
+    monthIndex = 0;
+  }
+
+  /* =========================================
+     SET EARNINGS
+  ========================================= */
+
+  earnings.forEach((item) => {
+
+    updatedAnnualData[monthIndex].earnings[
+      item.label
+    ] = Number(item.amount || 0);
+
+  });
+
+  /* =========================================
+     SET DEDUCTIONS
+  ========================================= */
+
+  deductions.forEach((item) => {
+
+    // Mandatory Deductions
+    if (
+      mandatoryDeductions.includes(item.label)
+    ) {
+
+      updatedAnnualData[monthIndex].mandatory[
+        item.label
+      ] = Number(item.amount || 0);
+
+    }
+
+    // Personal Deductions
+    else {
+
+      updatedAnnualData[monthIndex].personal[
+        item.label
+      ] = Number(item.amount || 0);
+
+    }
+
+  });
+
+  /* =========================================
+     UPDATE STATE
+  ========================================= */
+
+  setAnnualIncomeData(updatedAnnualData);
+
+  /* =========================================
+     SAVE TO LOCAL STORAGE
+  ========================================= */
+
+  const data = {
+    formData,
+    earnings,
+    deductions,
+    annualIncomeData: updatedAnnualData,
+    growthYears,
+  };
+
+  localStorage.setItem(
+    "salarySlipData",
+    JSON.stringify(data)
+  );
+
+  alert("Saved Successfully");
+};
+
+  const handleEdit = () => {
+    alert("Edit Mode Enabled");
+  };
+
+  const handleUpdate = () => {
+    handleSave();
+    alert("Updated Successfully");
+  };
+
+  const handleDelete = () => {
+    localStorage.removeItem(
+      "salarySlipData"
+    );
+
+    alert("Deleted Successfully");
+  };
+
+  React.useEffect(() => {
+    const savedData = localStorage.getItem(
+      "salarySlipData"
+    );
+
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+
+      setFormData(parsedData.formData);
+      setEarnings(parsedData.earnings);
+      setDeductions(parsedData.deductions);
+
+      if (parsedData.annualIncomeData) {
+        setAnnualIncomeData(
+          parsedData.annualIncomeData
+        );
+      }
+
+      if (parsedData.growthYears) {
+        setGrowthYears(
+          parsedData.growthYears
+        );
+      }
+    }
+  }, []);
+
+  return (
+    <div className="salary-slip">
+
+      {/* HEADER */}
+
+      <div className="header">
+        <h2>
+          THE SINGARENI COLLIERIES
+          COMPANY LIMITED
+        </h2>
+
+        <p>
+          EMPLOYEE SALARY DETAILS
+          (PROVISIONAL)
+        </p>
+      </div>
+
+      {/* TOP INFO */}
+
+      <div className="top-info">
+
+        <div>
+          <p>
+            <strong>EmpCode:</strong>
+
+            <input
+              type="text"
+              name="empCode"
+              value={formData.empCode}
+              onChange={handleChange}
+            />
+          </p>
+
+          <p>
+            <strong>EmpName:</strong>
+
+            <input
+              type="text"
+              name="empName"
+              value={formData.empName}
+              onChange={handleChange}
+            />
+          </p>
+        </div>
+
+        <div>
+          <p>
+            <strong>Month:</strong>
+
+            <input
+              type="text"
+              name="month"
+              value={formData.month}
+              onChange={handleChange}
+            />
+          </p>
+
+          <p>
+            <strong>Financial Year:</strong>
+
+            <input
+              type="text"
+              name="financialYear"
+              value={formData.financialYear}
+              onChange={handleChange}
+            />
+          </p>
+        </div>
+
+      </div>
+
+      {/* MAIN BODY */}
+
+      <div className="salary-body">
+
+        {/* EARNINGS */}
+
+        <div className="section earnings">
+
+          <h3>Earnings</h3>
+
+          <table>
+            <tbody>
+
+              {earnings.map(
+                (item, index) => (
+                  <tr key={index}>
+
+                    <td>
+                      <input
+                        type="text"
+                        value={item.label}
+                        onChange={(e) =>
+                          handleEarningChange(
+                            index,
+                            "label",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+
+                    <td>
+                      <input
+                        type="number"
+                        value={item.amount}
+                        onChange={(e) =>
+                          handleEarningChange(
+                            index,
+                            "amount",
+                            Number(
+                              e.target.value
+                            )
+                          )
+                        }
+                      />
+                    </td>
+
+                    <td>
+                      <button
+                        onClick={() =>
+                          removeEarningField(
+                            index
+                          )
+                        }
+                      >
+                        ❌
+                      </button>
+                    </td>
+
+                  </tr>
+                )
+              )}
+
+            </tbody>
+          </table>
+
+          <button
+            className="add-btn"
+            onClick={addEarningField}
+          >
+            + Add Earning
+          </button>
+
+        </div>
+
+        {/* DEDUCTIONS */}
+
+        <div className="section deductions">
+
+          <h3>Deductions</h3>
+
+          <table>
+            <tbody>
+
+              {deductions.map(
+                (item, index) => (
+                  <tr key={index}>
+
+                    <td>
+                      <input
+                        type="text"
+                        value={item.label}
+                        onChange={(e) =>
+                          handleDeductionChange(
+                            index,
+                            "label",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+
+                    <td>
+                      <input
+                        type="number"
+                        value={item.amount}
+                        onChange={(e) =>
+                          handleDeductionChange(
+                            index,
+                            "amount",
+                            Number(
+                              e.target.value
+                            )
+                          )
+                        }
+                      />
+                    </td>
+
+                    <td>
+                      <button
+                        onClick={() =>
+                          removeDeductionField(
+                            index
+                          )
+                        }
+                      >
+                        ❌
+                      </button>
+                    </td>
+
+                  </tr>
+                )
+              )}
+
+            </tbody>
+          </table>
+
+          <button
+            className="add-btn"
+            onClick={addDeductionField}
+          >
+            + Add Deduction
+          </button>
+
+        </div>
+
+        {/* SUMMARY */}
+
+        <div className="section summary">
+
+          <h3>Summary</h3>
+
+          <table>
+            <tbody>
+
+              <tr>
+                <td>Gross Earnings</td>
+                <td>
+                  {grossEarnings.toFixed(2)}
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  Total Deductions
+                </td>
+
+                <td>
+                  {totalDeductions.toFixed(
+                    2
+                  )}
+                </td>
+              </tr>
+
+              <tr>
+                <td>Net Pay</td>
+                <td>
+                  {netPay.toFixed(2)}
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+      {/* ADVANCED SALARY TABLE */}
+
+      <div className="advanced-income-section">
+
+        <h2>
+          Actual Salary And Income
+        </h2>
+
+        <div className="advanced-table-wrapper">
+
+          <table className="advanced-income-table">
+
+            <thead>
+
+              <tr>
+
+                <th>Month</th>
+
+                {earnings.map((item, index) => (
+                  <th key={index}>
+                    {item.label}
+                  </th>
+                ))}
+
+                {mandatoryDeductions.map(
+                  (item, index) => (
+                    <th key={index}>
+                      {item}
+                    </th>
+                  )
+                )}
+
+                {personalDeductions.map(
+                  (item, index) => (
+                    <th key={index}>
+                      {item}
+                    </th>
+                  )
+                )}
+
+                {otherIncomeHeads.map(
+                  (item, index) => (
+                    <th key={index}>
+                      {item}
+                    </th>
+                  )
+                )}
+
+                {capitalReceiptHeads.map(
+                  (item, index) => (
+                    <th key={index}>
+                      {item}
+                    </th>
+                  )
+                )}
+
+                <th>Tax Exemption</th>
+                <th>Total Earnings</th>
+                <th>Total Deductions</th>
+                <th>Other Income</th>
+                <th>Capital Receipt</th>
+                <th>Net Salary</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+  {/* MONTH ROWS */}
+
+  {months.map((month, monthIndex) => {
+
+    const earningTotal =
+      earnings.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            annualIncomeData[
+              monthIndex
+            ]?.earnings?.[
+              item.label
+            ] || 0
+          ),
+        0
+      );
+
+    const mandatoryTotal =
+      mandatoryDeductions.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            annualIncomeData[
+              monthIndex
+            ]?.mandatory?.[
+              item
+            ] || 0
+          ),
+        0
+      );
+
+    const personalTotal =
+      personalDeductions.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            annualIncomeData[
+              monthIndex
+            ]?.personal?.[
+              item
+            ] || 0
+          ),
+        0
+      );
+
+    const otherIncomeTotal =
+      otherIncomeHeads.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            annualIncomeData[
+              monthIndex
+            ]?.otherIncome?.[
+              item
+            ] || 0
+          ),
+        0
+      );
+
+    const capitalReceiptTotal =
+      capitalReceiptHeads.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            annualIncomeData[
+              monthIndex
+            ]?.capitalReceipt?.[
+              item
+            ] || 0
+          ),
+        0
+      );
+
+    const totalDeduction =
+      mandatoryTotal +
+      personalTotal;
+
+    const netSalary =
+      earningTotal -
+      totalDeduction +
+      otherIncomeTotal;
+
+    return (
+      <tr key={monthIndex}>
+
+        <td>{month}</td>
+
+        {/* Earnings */}
+
+        {earnings.map(
+          (item, index) => (
+            <td key={index}>
+
+              <input
+                type="number"
+                value={
+                  annualIncomeData[
+                    monthIndex
+                  ]?.earnings?.[
+                    item.label
+                  ] || ""
+                }
+                onChange={(e) =>
+                  handleAnnualDataChange(
+                    monthIndex,
+                    "earnings",
+                    item.label,
+                    e.target.value
+                  )
+                }
+              />
+
+            </td>
+          )
+        )}
+
+        {/* Mandatory */}
+
+        {mandatoryDeductions.map(
+          (item, index) => (
+            <td key={index}>
+
+              <input
+                type="number"
+                value={
+                  annualIncomeData[
+                    monthIndex
+                  ]?.mandatory?.[
+                    item
+                  ] || ""
+                }
+                onChange={(e) =>
+                  handleAnnualDataChange(
+                    monthIndex,
+                    "mandatory",
+                    item,
+                    e.target.value
+                  )
+                }
+              />
+
+            </td>
+          )
+        )}
+
+        {/* Personal */}
+
+        {personalDeductions.map(
+          (item, index) => (
+            <td key={index}>
+
+              <input
+                type="number"
+                value={
+                  annualIncomeData[
+                    monthIndex
+                  ]?.personal?.[
+                    item
+                  ] || ""
+                }
+                onChange={(e) =>
+                  handleAnnualDataChange(
+                    monthIndex,
+                    "personal",
+                    item,
+                    e.target.value
+                  )
+                }
+              />
+
+            </td>
+          )
+        )}
+
+        {/* Other Income */}
+
+        {otherIncomeHeads.map(
+          (item, index) => (
+            <td key={index}>
+
+              <input
+                type="number"
+                value={
+                  annualIncomeData[
+                    monthIndex
+                  ]?.otherIncome?.[
+                    item
+                  ] || ""
+                }
+                onChange={(e) =>
+                  handleAnnualDataChange(
+                    monthIndex,
+                    "otherIncome",
+                    item,
+                    e.target.value
+                  )
+                }
+              />
+
+            </td>
+          )
+        )}
+
+        {/* Capital Receipt */}
+
+        {capitalReceiptHeads.map(
+          (item, index) => (
+            <td key={index}>
+
+              <input
+                type="number"
+                value={
+                  annualIncomeData[
+                    monthIndex
+                  ]?.capitalReceipt?.[
+                    item
+                  ] || ""
+                }
+                onChange={(e) =>
+                  handleAnnualDataChange(
+                    monthIndex,
+                    "capitalReceipt",
+                    item,
+                    e.target.value
+                  )
+                }
+              />
+
+            </td>
+          )
+        )}
+
+        {/* Tax Exemption */}
+
+        <td>
+
+          <input
+            type="number"
+            value={
+              annualIncomeData[
+                monthIndex
+              ]?.taxExemption?.value || ""
+            }
+            onChange={(e) =>
+              handleAnnualDataChange(
+                monthIndex,
+                "taxExemption",
+                "value",
+                e.target.value
+              )
+            }
+          />
+
+        </td>
+
+        {/* Totals */}
+
+        <td>
+          {earningTotal.toFixed(2)}
+        </td>
+
+        <td>
+          {totalDeduction.toFixed(2)}
+        </td>
+
+        <td>
+          {otherIncomeTotal.toFixed(2)}
+        </td>
+
+        <td>
+          {capitalReceiptTotal.toFixed(2)}
+        </td>
+
+        <td>
+          {netSalary.toFixed(2)}
+        </td>
+
+      </tr>
+    );
+  })}
+
+  {/* TOTAL ROW */}
+
+  <tr className="total-row">
+
+    <td>
+      <strong>TOTAL</strong>
+    </td>
+
+    {/* Earnings Total */}
+
+    {earnings.map((item, index) => {
+
+      const total =
+        annualIncomeData.reduce(
+          (sum, month) =>
+            sum +
+            Number(
+              month.earnings?.[
+                item.label
+              ] || 0
+            ),
+          0
+        );
+
+      return (
+        <td key={index}>
+          <strong>
+            {total.toFixed(2)}
+          </strong>
+        </td>
+      );
+    })}
+
+    {/* Mandatory Total */}
+
+    {mandatoryDeductions.map(
+      (item, index) => {
+
+        const total =
+          annualIncomeData.reduce(
+            (sum, month) =>
+              sum +
+              Number(
+                month.mandatory?.[
+                  item
+                ] || 0
+              ),
+            0
+          );
+
+        return (
+          <td key={index}>
+            <strong>
+              {total.toFixed(2)}
+            </strong>
+          </td>
+        );
+      }
+    )}
+
+    {/* Personal Total */}
+
+    {personalDeductions.map(
+      (item, index) => {
+
+        const total =
+          annualIncomeData.reduce(
+            (sum, month) =>
+              sum +
+              Number(
+                month.personal?.[
+                  item
+                ] || 0
+              ),
+            0
+          );
+
+        return (
+          <td key={index}>
+            <strong>
+              {total.toFixed(2)}
+            </strong>
+          </td>
+        );
+      }
+    )}
+
+    {/* Other Income Total */}
+
+    {otherIncomeHeads.map(
+      (item, index) => {
+
+        const total =
+          annualIncomeData.reduce(
+            (sum, month) =>
+              sum +
+              Number(
+                month.otherIncome?.[
+                  item
+                ] || 0
+              ),
+            0
+          );
+
+        return (
+          <td key={index}>
+            <strong>
+              {total.toFixed(2)}
+            </strong>
+          </td>
+        );
+      }
+    )}
+
+    {/* Capital Receipt Total */}
+
+    {capitalReceiptHeads.map(
+      (item, index) => {
+
+        const total =
+          annualIncomeData.reduce(
+            (sum, month) =>
+              sum +
+              Number(
+                month.capitalReceipt?.[
+                  item
+                ] || 0
+              ),
+            0
+          );
+
+        return (
+          <td key={index}>
+            <strong>
+              {total.toFixed(2)}
+            </strong>
+          </td>
+        );
+      }
+    )}
+
+    {/* Tax Exemption Total */}
+
+    <td>
+
+      <strong>
+
+        {
+          annualIncomeData.reduce(
+            (sum, month) =>
+              sum +
+              Number(
+                month.taxExemption
+                  ?.value || 0
+              ),
+            0
+          ).toFixed(2)
+        }
+
+      </strong>
+
+    </td>
+
+    {/* Total Earnings */}
+
+    <td>
+
+      <strong>
+
+        {
+          annualIncomeData.reduce(
+            (sum, month) => {
+
+              const total =
+                earnings.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.earnings?.[
+                        item.label
+                      ] || 0
+                    ),
+                  0
+                );
+
+              return sum + total;
+
+            },
+            0
+          ).toFixed(2)
+        }
+
+      </strong>
+
+    </td>
+
+    {/* Total Deductions */}
+
+    <td>
+
+      <strong>
+
+        {
+          annualIncomeData.reduce(
+            (sum, month) => {
+
+              const mandatory =
+                mandatoryDeductions.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.mandatory?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              const personal =
+                personalDeductions.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.personal?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              return (
+                sum +
+                mandatory +
+                personal
+              );
+
+            },
+            0
+          ).toFixed(2)
+        }
+
+      </strong>
+
+    </td>
+
+    {/* Other Income Total */}
+
+    <td>
+
+      <strong>
+
+        {
+          annualIncomeData.reduce(
+            (sum, month) => {
+
+              const total =
+                otherIncomeHeads.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.otherIncome?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              return sum + total;
+
+            },
+            0
+          ).toFixed(2)
+        }
+
+      </strong>
+
+    </td>
+
+    {/* Capital Receipt Total */}
+
+    <td>
+
+      <strong>
+
+        {
+          annualIncomeData.reduce(
+            (sum, month) => {
+
+              const total =
+                capitalReceiptHeads.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.capitalReceipt?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              return sum + total;
+
+            },
+            0
+          ).toFixed(2)
+        }
+
+      </strong>
+
+    </td>
+
+    {/* Net Salary Total */}
+
+    <td>
+
+      <strong>
+
+        {
+          annualIncomeData.reduce(
+            (sum, month) => {
+
+              const earning =
+                earnings.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.earnings?.[
+                        item.label
+                      ] || 0
+                    ),
+                  0
+                );
+
+              const mandatory =
+                mandatoryDeductions.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.mandatory?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              const personal =
+                personalDeductions.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.personal?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              const other =
+                otherIncomeHeads.reduce(
+                  (s, item) =>
+                    s +
+                    Number(
+                      month.otherIncome?.[
+                        item
+                      ] || 0
+                    ),
+                  0
+                );
+
+              return (
+                sum +
+                (
+                  earning -
+                  mandatory -
+                  personal +
+                  other
+                )
+              );
+
+            },
+            0
+          ).toFixed(2)
+        }
+
+      </strong>
+
+    </td>
+
+  </tr>
+
+</tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      {/* GROWTH CALCULATOR */}
+
+      <div className="growth-calculator">
+
+        <h2>
+          Income Growth Rate Calculator
+        </h2>
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Average Income</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {growthYears.map(
+              (item, index) => (
+                <tr key={index}>
+
+                  <td>
+                    <input
+                      type="text"
+                      value={item.year}
+                      onChange={(e) => {
+                        const updated = [
+                          ...growthYears,
+                        ];
+
+                        updated[index].year =
+                          e.target.value;
+
+                        setGrowthYears(
+                          updated
+                        );
+                      }}
+                    />
+                  </td>
+
+                  <td>
+                    <input
+                      type="number"
+                      value={item.income}
+                      onChange={(e) => {
+                        const updated = [
+                          ...growthYears,
+                        ];
+
+                        updated[index].income =
+                          e.target.value;
+
+                        setGrowthYears(
+                          updated
+                        );
+                      }}
+                    />
+                  </td>
+
+                </tr>
+              )
+            )}
+
+          </tbody>
+
+        </table>
+
+        <div className="growth-result">
+
+          Annual Growth Rate :
+
+          <strong>
+            {calculateGrowthRate()}%
+          </strong>
+
+        </div>
+
+      </div>
+
+      {/* FOOTER */}
+
+      <div className="bottom-actions">
+
+        <button onClick={handleSave}>
+          Save
+        </button>
+
+        <button onClick={handleEdit}>
+          Edit
+        </button>
+
+        <button onClick={handleUpdate}>
+          Update
+        </button>
+
+        <button onClick={handleDelete}>
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+export default PartTimeSalarySlip;
+

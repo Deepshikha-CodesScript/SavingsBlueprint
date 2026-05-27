@@ -1,0 +1,147 @@
+Yes, absolutely! In fact, separating your data fetching logic and calculations into a different file is a highly recommended practice. It keeps your React components clean, reusable, and easy to maintain.
+
+You can handle this in **two clean ways** without cluttering your UI components:
+
+1. **A Service Utility File** (Great for direct API calls/Local Storage interaction).
+2. **A Custom React Hook** (The standard React way to bundle state and data fetching neatly into one reusable function).
+
+Here is how you can set both up.
+
+---
+
+### Method 1: Using a Service File (`src/services/incomeService.js`)
+
+You can create a standalone JavaScript utility file that handles pulling data from your backend API or local storage.
+
+```javascript
+// src/services/incomeService.js
+
+/**
+ * Fetches historical income records from the backend database or fallback local storage
+ */
+export const getHistoricalIncomeData = async () => {
+  try {
+    // 1. Try fetching from your real Node.js/Express backend
+    const response = await fetch("http://localhost:5000/api/income/history", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (error) {
+    console.warn("Backend unavailable, falling back to local data...", error);
+  }
+
+  // 2. Fallback: Check local storage if the backend fails/isn't wired up yet
+  const localData = localStorage.getItem("historicalIncome");
+  if (localData) {
+    return JSON.parse(localData);
+  }
+
+  // 3. Last Resort: Default baseline dataset if absolutely nothing else exists
+  return [
+    { year: 2022, salary: 550000, businessIncome: 120000 },
+    { year: 2023, salary: 620000, businessIncome: 140000 },
+    { year: 2024, salary: 680000, businessIncome: 160000 },
+    { year: 2025, salary: 740000, businessIncome: 185000 },
+    { year: 2026, salary: 800000, businessIncome: 200000 },
+  ];
+};
+
+```
+
+#### How your Dashboard or Component imports it:
+
+```jsx
+import { useState, useEffect } from 'react';
+import { getHistoricalIncomeData } from '../services/incomeService';
+import FutureSavingsForecast from './FutureSavingsForecast';
+
+function DashboardManager() {
+  const [historicalData, setHistoricalData] = useState([]);
+
+  useEffect(() => {
+    getHistoricalIncomeData().then(data => setHistoricalData(data));
+  }, []);
+
+  return <FutureSavingsForecast historicalData={historicalData} />;
+}
+
+```
+
+---
+
+### Method 2: The Best Practice React Way (Custom Hook)
+
+If you want the state management and the fetching completely out of your visual page layout files, encapsulate them in a custom hook file named `src/hooks/useIncomeHistory.js`.
+
+```javascript
+// src/hooks/useIncomeHistory.js
+import { useState, useEffect } from 'react';
+
+export function useIncomeHistory() {
+  const [historicalData, setHistoricalData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Fetch from API or LocalStorage
+        const response = await fetch("http://localhost:5000/api/income/history");
+        if (response.ok) {
+          const data = await response.json();
+          setHistoricalData(data);
+        } else {
+          // Fallback static data if api sends error
+          setHistoricalData(getMockFallback());
+        }
+      } catch (err) {
+        setHistoricalData(getMockFallback());
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  return { historicalData, loading };
+}
+
+// Kept private at the bottom of the file out of sight
+function getMockFallback() {
+  return [
+    { year: 2022, salary: 550000, businessIncome: 120000 },
+    { year: 2023, salary: 620000, businessIncome: 140000 },
+    { year: 2024, salary: 680000, businessIncome: 160000 },
+    { year: 2025, salary: 740000, businessIncome: 185000 },
+    { year: 2026, salary: 800000, businessIncome: 200000 },
+  ];
+}
+
+```
+
+#### How elegant your Dashboard file becomes:
+
+```jsx
+// src/pages/DashboardManager.jsx
+import { useIncomeHistory } from '../hooks/useIncomeHistory';
+import FutureSavingsForecast from './FutureSavingsForecast';
+
+function DashboardManager() {
+  const { historicalData, loading } = useIncomeHistory();
+
+  if (loading) return <div>Loading records and analyzing trends...</div>;
+
+  return <FutureSavingsForecast historicalData={historicalData} />;
+}
+
+```
+
+### Which one should you pick?
+
+* Go with **Method 1 (Service)** if you just want a centralized place to write your `fetch()` operations.
+* Go with **Method 2 (Custom Hook)** if you want to cleanly hide the `useState` and `useEffect` blocks from your visual page designs.
