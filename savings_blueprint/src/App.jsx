@@ -64,7 +64,8 @@ function App() {
 
                 <Routes>
 
-                  <Route path="/" element={<Dashboard />} />
+                  {/* <Route path="/" element={<Dashboard />} /> */}
+                  <Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}/>
 
                   <Route path="/income" element={<Income />} />
 
