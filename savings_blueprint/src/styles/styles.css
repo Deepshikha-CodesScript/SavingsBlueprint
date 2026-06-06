@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -438,6 +439,32 @@ body {
     padding: 16px;
   }
 }
+
+/* PREVENT GRID OVERFLOW */
+
+.sb-dashboard-grid,
+.sb-dashboard-content,
+.sb-income-grid,
+.sb-savings-grid,
+.sb-goals-grid,
+.sb-reports-grid,
+.modern-details-grid,
+.salary-table,
+.employee-info-grid,
+.salary-breakdown-wrapper {
+min-width: 0;
+}
+
+.sb-card,
+.sb-form-card,
+.sb-summary-card,
+.sb-goal-card,
+.sb-report-card,
+.breakdown-column,
+.info-column {
+min-width: 0;
+}
+
 
 
 
@@ -1060,6 +1087,79 @@ body {
 
 
 
+
+
+
+
+
+
+
+
+.personal-salary-container {
+  margin-top: 30px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.personal-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.summary-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+}
+
+.summary-card h4 {
+  margin-bottom: 10px;
+}
+
+.summary-card p {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.personal-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.breakdown-box {
+  background: #fafafa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.breakdown-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.breakdown-box li {
+  padding: 5px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =====================================================
    Reports Page
 ===================================================== */
@@ -1244,6 +1344,47 @@ body {
 
 
 
+.section-card {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e5e5e5;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.section-divider {
+  margin: 35px 0;
+  border: 0;
+  border-top: 2px solid #e5e5e5;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* EMPLOYEE INFO */
 .employee-info {
@@ -1394,140 +1535,467 @@ body {
 
 
 
+/* =========================================
+   PAGE BACKGROUND
+========================================= */
 
+body {
+  background: linear-gradient(135deg, #0f172a, #1e293b, #111827);
+  min-height: 100vh;
+  padding: 30px;
+  font-family: "Poppins", sans-serif;
+}
 
-
-
-
-
-
-
-
+/* =========================================
+   MAIN CONTAINER
+========================================= */
 
 .salary-slip-container {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 30px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1100px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  padding: 40px;
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.18),
+    0 5px 15px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
 }
+
+/* TOP GLOW EFFECT */
+
+.salary-slip-container::before {
+  content: "";
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: rgba(37, 99, 235, 0.12);
+  border-radius: 50%;
+  top: -120px;
+  right: -120px;
+}
+
+.salary-slip-container::after {
+  content: "";
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 50%;
+  bottom: -100px;
+  left: -100px;
+}
+
+/* =========================================
+   HEADER
+========================================= */
 
 .salary-slip-header {
   text-align: center;
-  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
 }
+
+.salary-slip-header h2 {
+  font-size: 38px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.salary-slip-header h3 {
+  font-size: 22px;
+  color: #2563eb;
+  font-weight: 700;
+  background: linear-gradient(90deg, #2563eb, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* =========================================
+   DIVIDER
+========================================= */
+
+.divider {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+  margin: 30px 0;
+}
+
+/* =========================================
+   EMPLOYEE INFO SECTION
+========================================= */
 
 .employee-info-grid {
   display: flex;
-  justify-content: space-between;
-  margin: 15px 0;
+  gap: 25px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
 }
 
 .info-column {
-  width: 48%;
+  flex: 1;
+  min-width: 320px;
+  background: white;
+  border-radius: 22px;
+  padding: 25px;
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  border: 1px solid #e2e8f0;
 }
 
-.salary-breakdown-wrapper {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.breakdown-column {
-  width: 48%;
+.info-column p {
+  margin-bottom: 18px;
   display: flex;
   flex-direction: column;
 }
 
-.dynamic-row-item {
-  display: flex;
-  align-items: center;
+.info-column strong {
   margin-bottom: 8px;
-  gap: 8px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.input-label { flex: 2; }
-.input-amount { flex: 1; text-align: right; }
+.info-column input {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 15px;
+  transition: 0.3s ease;
+  outline: none;
+}
+
+.info-column input:focus {
+  background: white;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   EARNINGS & DEDUCTIONS
+========================================= */
+
+.salary-breakdown-wrapper {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.breakdown-column {
+  flex: 1;
+  min-width: 420px;
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.breakdown-column h4 {
+  font-size: 24px;
+  margin-bottom: 22px;
+  color: #0f172a;
+  display: inline-block;
+  position: relative;
+}
+
+.breakdown-column h4::after {
+  content: "";
+  width: 60%;
+  height: 4px;
+  border-radius: 10px;
+  background: linear-gradient(to right, #2563eb, #06b6d4);
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+}
+
+/* =========================================
+   INPUT ROWS
+========================================= */
+
+.dynamic-row-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.input-label,
+.input-amount {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #dbeafe;
+  background: #f8fafc;
+  font-size: 14px;
+  outline: none;
+  transition: 0.3s;
+}
+
+/* First Part */
+.input-label {
+  width: 55%;
+}
+
+
+/* Second Part */
+.input-amount {
+  width: 30%;
+  text-align: right;
+}
+
+.input-label:focus,
+.input-amount:focus {
+  background: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.add-row-btn,
+.action-btn,
+.delete-row-btn {
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ADD BUTTON */
+
+.add-row-btn {
+  margin-top: 14px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.add-row-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+}
+
+/* DELETE BUTTON */
+
+.delete-row-btn {
+  width: 10%;  /* increase third section width */
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  justify-content: center;
+}
+
+.delete-row-btn:hover {
+  transform: scale(1.08);
+}
+
+/* =========================================
+   TOTAL SUMMARY CARDS
+========================================= */
 
 .salary-totals-summary {
   display: flex;
-  justify-content: space-between;
-  background-color: #f9fafb;
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 25px;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 35px;
+  position: relative;
+  z-index: 2;
 }
+
+.total-block {
+  flex: 1;
+  min-width: 250px;
+  padding: 28px;
+  border-radius: 24px;
+  text-align: center;
+  background: white;
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  transition: 0.3s;
+}
+
+.total-block:hover {
+  transform: translateY(-4px);
+}
+
+.total-block span {
+  display: block;
+  margin-bottom: 12px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.total-block strong {
+  font-size: 30px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* NET PAY SPECIAL CARD */
 
 .net-pay-block {
-  color: #047857;
-  font-size: 1.1rem;
-}
-
-.salary-actions-footer {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 30px;
-}
-
-
-
-
-
-
-
-.salary-btn-group {
-  display: flex;
-  gap: 15px;
-  margin-top: 25px;
-  flex-wrap: wrap;
-}
-
-.salary-btn {
-  padding: 12px 22px;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.3s;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
 }
 
-.add-btn {
-  background: #0077b6;
+.net-pay-block span,
+.net-pay-block strong {
+  color: white;
 }
 
-.add-btn:hover {
-  background: #023e8a;
+/* =========================================
+   ACTION BUTTONS
+========================================= */
+
+.salary-actions-footer {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 40px;
+  flex-wrap: wrap;
 }
 
-.edit-btn {
-  background: #00b4d8;
+.action-btn {
+  padding: 15px 28px;
+  border-radius: 16px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  min-width: 150px;
 }
 
-.edit-btn:hover {
-  background: #0096c7;
+/* BUTTON COLORS */
+
+.action-btn.save {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
-.update-btn {
-  background: #48cae4;
-  color: #03045e;
+.action-btn.edit {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
 }
 
-.update-btn:hover {
-  background: #90e0ef;
+.action-btn.update {
+  background: linear-gradient(135deg, #10b981, #059669);
 }
 
-.delete-btn {
-  background: #03045e;
+.action-btn.delete {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
-.delete-btn:hover {
-  background: #023e8a;
+.action-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 900px) {
+
+  .salary-slip-container {
+    padding: 25px;
+  }
+
+  .salary-breakdown-wrapper,
+  .salary-totals-summary,
+  .employee-info-grid {
+    flex-direction: column;
+  }
+
+  .breakdown-column,
+  .info-column,
+  .total-block {
+    min-width: 100%;
+  }
+
+  .dynamic-row-item {
+    flex-direction: column;
+  }
+
+  .delete-row-btn {
+    width: 100%;
+  }
+
+  .salary-actions-footer {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+
+  .salary-slip-header h2 {
+    font-size: 28px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+.forecast-section {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.forecast-section input {
+  flex: 1;
+  min-width: 220px;
+  padding: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+.forecast-section input:focus {
+  border-color: #2563eb;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(37,99,235,.1);
 }
 
 
@@ -1565,6 +2033,101 @@ body {
 
 .bottom-actions button:hover {
   background: #083358;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.sb-user-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.sb-user-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.capital-receipt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.capital-card {
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.capital-card h4 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.capital-source-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+}
+
+.capital-source-grid input {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+@media(max-width:768px){
+  .capital-receipt-grid{
+    grid-template-columns:1fr;
+  }
+
+  .capital-source-grid{
+    grid-template-columns:1fr;
+  }
 }
 
 
@@ -3018,276 +3581,278 @@ body {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =====================================================
-   EXTRA MOBILE RESPONSIVE IMPROVEMENTS
+FIXED FULL WIDTH NAVBAR
 ===================================================== */
 
-@media (max-width: 1200px) {
+.sb-navbar {
+width: 100%;
+max-width: 100%;
+background: #0d6efd;
+padding: 14px 0;
+position: sticky;
+top: 0;
+z-index: 999;
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 
-  .sb-navbar-container {
-    grid-template-columns: 220px 1fr 120px;
-    gap: 12px;
-  }
+overflow-x: hidden;
+}
 
-  .sb-nav-menu {
-    gap: 10px;
-  }
+/* MAIN CONTAINER */
 
-  .sb-nav-link {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
+.sb-navbar-container {
+width: 100%;
+max-width: 100%;
+margin: 0 auto;
+
+padding: 0 20px;
+
+display: grid;
+grid-template-columns: 220px 1fr 160px;
+
+align-items: center;
+gap: 15px;
+
+overflow: hidden;
+}
+
+/* LOGO */
+
+.sb-logo {
+color: white;
+font-size: 28px;
+font-weight: 700;
+text-decoration: none;
+
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+/* MENU */
+
+.sb-nav-menu {
+display: flex;
+align-items: center;
+justify-content: center;
+
+list-style: none;
+gap: 10px;
+
+min-width: 0;
+
+overflow-x: auto;
+overflow-y: hidden;
+
+scrollbar-width: none;
+}
+
+.sb-nav-menu::-webkit-scrollbar {
+display: none;
+}
+
+/* LINKS */
+
+.sb-nav-link {
+text-decoration: none;
+color: white;
+
+padding: 10px 14px;
+border-radius: 8px;
+
+transition: 0.3s ease;
+
+font-size: 14px;
+font-weight: 500;
+
+white-space: nowrap;
+flex-shrink: 0;
+}
+
+.sb-nav-link:hover {
+background: rgba(255,255,255,0.15);
+}
+
+.sb-nav-link.active {
+background: white;
+color: #0d6efd;
+font-weight: 600;
+}
+
+/* RIGHT SECTION */
+
+.sb-user-section {
+display: flex;
+justify-content: flex-end;
+align-items: center;
+
+min-width: 0;
+}
+
+/* BUTTON */
+
+.sb-btn {
+border: none;
+background: white;
+color: #0d6efd;
+
+padding: 10px 18px;
+border-radius: 10px;
+
+cursor: pointer;
+
+font-size: 14px;
+font-weight: 600;
+
+white-space: nowrap;
+
+transition: 0.3s ease;
+}
+
+.sb-btn:hover {
+transform: translateY(-2px);
 }
 
 /* =====================================================
-   TABLET VIEW
+TABLET
 ===================================================== */
 
 @media (max-width: 992px) {
 
-  .sb-navbar {
-    padding: 16px 0;
-  }
+.sb-navbar-container {
+grid-template-columns: 1fr;
+text-align: center;
+gap: 18px;
+}
 
-  .sb-navbar-container {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 20px;
-  }
+.sb-logo {
+margin: auto;
+}
 
-  .sb-logo {
-    justify-self: center;
-  }
+.sb-nav-menu {
+justify-content: flex-start;
+padding-bottom: 8px;
+}
 
-  .sb-nav-menu {
-    width: 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    flex-wrap: nowrap;
-  }
-
-  .sb-nav-menu::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .sb-nav-menu::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.4);
-    border-radius: 10px;
-  }
-
-  .sb-user-section {
-    justify-content: center;
-  }
-
-  .sb-dashboard-grid,
-  .sb-goals-grid,
-  .sb-reports-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sb-dashboard-content,
-  .sb-income-grid,
-  .sb-savings-grid,
-  .sb-plan-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sb-plan-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sb-footer-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.sb-user-section {
+justify-content: center;
+}
 }
 
 /* =====================================================
-   MOBILE VIEW
+MOBILE
 ===================================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 576px) {
 
-  .sb-container {
-    padding: 20px 16px;
-  }
-
-  .sb-page-title {
-    font-size: 24px;
-  }
-
-  .sb-section-title {
-    font-size: 20px;
-  }
-
-  .sb-navbar-container {
-    padding: 0 15px;
-  }
-
-  .sb-logo {
-    font-size: 22px;
-  }
-
-  .sb-nav-menu {
-    gap: 8px;
-  }
-
-  .sb-nav-link {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-
-  .sb-btn {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .sb-dashboard-grid,
-  .sb-goals-grid,
-  .sb-reports-grid,
-  .sb-plan-cards,
-  .sb-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sb-card,
-  .sb-form-card,
-  .sb-summary-card,
-  .sb-report-card,
-  .sb-goal-card,
-  .sb-forecast-table-card {
-    padding: 20px;
-  }
-
-  .sb-card-amount {
-    font-size: 24px;
-  }
-
-  .sb-total-income h1 {
-    font-size: 28px;
-  }
-
-  .sb-plan-card h1 {
-    font-size: 32px;
-  }
-
-  .sb-table {
-    min-width: 600px;
-  }
-
-  .sb-forecast-table-card,
-  .sb-table-wrapper {
-    overflow-x: auto;
-  }
-
-  .sb-footer-container {
-    grid-template-columns: 1fr;
-    gap: 30px;
-    padding: 40px 20px;
-  }
-
-  .sb-footer-logo {
-    font-size: 24px;
-  }
-
-  .sb-footer-title {
-    font-size: 18px;
-  }
+.sb-navbar {
+padding: 12px 0;
 }
 
-/* =====================================================
-   SMALL MOBILE DEVICES
-===================================================== */
-
-@media (max-width: 480px) {
-
-  .sb-navbar {
-    padding: 12px 0;
-  }
-
-  .sb-logo {
-    font-size: 20px;
-  }
-
-  .sb-nav-link {
-    font-size: 12px;
-    padding: 7px 9px;
-  }
-
-  .sb-btn {
-    width: 100%;
-    max-width: 180px;
-  }
-
-  .sb-page-title {
-    font-size: 22px;
-  }
-
-  .sb-section-title {
-    font-size: 18px;
-  }
-
-  .sb-card-title,
-  .sb-goal-title,
-  .sb-report-title {
-    font-size: 17px;
-  }
-
-  .sb-card-amount {
-    font-size: 22px;
-  }
-
-  .sb-total-income {
-    padding: 20px;
-  }
-
-  .sb-total-income h1 {
-    font-size: 24px;
-  }
-
-  .login-left,
-  .login-right {
-    padding: 30px 20px;
-  }
-
-  .login-left h1 {
-    font-size: 28px;
-  }
-
-  .login-form h2 {
-    font-size: 26px;
-  }
-
-  .form-group input {
-    padding: 12px;
-  }
-
-  .login-btn {
-    padding: 12px;
-  }
+.sb-navbar-container {
+padding: 0 12px;
 }
+
+.sb-logo {
+font-size: 22px;
+}
+
+.sb-nav-link {
+padding: 8px 10px;
+font-size: 13px;
+}
+
+.sb-btn {
+padding: 9px 14px;
+font-size: 13px;
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================
+   ADDITIONAL CAPITAL RECEIPTS
+========================================= */
+
+.breakdown-column h4 {
+  margin-top: 25px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  font-size: 24px;
+  color: #0f172a;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.breakdown-column .dynamic-row-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.breakdown-column .input-label {
+  flex: 2;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+.breakdown-column .input-amount {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  text-align: right;
+  font-size: 14px;
+}
+
+.breakdown-column .input-label:focus,
+.breakdown-column .input-amount:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.breakdown-column .add-row-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.breakdown-column .delete-row-btn {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

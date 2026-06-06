@@ -1,164 +1,155 @@
-// src/pages/Register.jsx
-
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  // Handle Input Change
   const handleChange = (e) => {
-
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-
   };
 
-  // Handle Register
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
-    setMessage("");
     setError("");
 
-    try {
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
+    try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/register",
         {
+          name: formData.name,
           email: formData.email,
           password: formData.password,
         }
       );
 
-      setMessage(res.data.message);
+      alert(res.data.message);
 
-      // Clear Form
-      setFormData({
-        email: "",
-        password: "",
-      });
-
-      // Redirect to Login Page
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
-
+      navigate("/login");
     } catch (error) {
-
       setError(
-        error.response?.data?.message || "Registration Failed"
+        error.response?.data?.message ||
+          "Registration Failed"
       );
-
     }
-
   };
 
   return (
-
-    <div className="register-page">
-
-      <div className="register-container">
-
-        {/* Left Section */}
-        <div className="register-left">
-
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-left">
           <h1>Savings Blueprint</h1>
 
           <p>
-            Create your account and start managing your
-            income, expenses and savings smarter.
+            Create your account and start managing
+            income, savings, investments and goals.
           </p>
-
         </div>
 
-        {/* Right Section */}
-        <div className="register-right">
-
+        <div className="login-right">
           <form
-            className="register-form"
+            className="login-form"
             onSubmit={handleSubmit}
           >
-
             <h2>Register</h2>
 
-            {/* Success Message */}
-            {message && (
-              <p className="success-message">
-                {message}
-              </p>
-            )}
-
-            {/* Error Message */}
             {error && (
-              <p className="error-message">
+              <p className="login-error">
                 {error}
               </p>
             )}
 
-            {/* Email */}
             <div className="form-group">
+              <label>Name</label>
 
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
               <label>Email</label>
 
               <input
                 type="email"
                 name="email"
-                placeholder="Enter Email"
+                placeholder="Enter email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
-
             </div>
 
-            {/* Password */}
             <div className="form-group">
-
               <label>Password</label>
 
               <input
                 type="password"
                 name="password"
-                placeholder="Enter Password"
+                placeholder="Enter password"
                 value={formData.password}
                 onChange={handleChange}
                 required
               />
-
             </div>
 
-            {/* Button */}
+            <div className="form-group">
+              <label>Confirm Password</label>
+
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
             <button
               type="submit"
-              className="register-btn"
+              className="login-btn"
             >
               Register
             </button>
 
+            <p className="register-text">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="register-link"
+              >
+                Login
+              </Link>
+            </p>
           </form>
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 };
 
 export default Register;

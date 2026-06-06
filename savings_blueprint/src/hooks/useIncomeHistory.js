@@ -9,7 +9,7 @@ export function useIncomeHistory() {
     async function loadData() {
       try {
         // Fetch from API or LocalStorage
-        const response = await fetch("http://localhost:5000/api/income/history");
+        const response = await fetch("http://localhost:5000/api/otherincome/history");
         if (response.ok) {
           const data = await response.json();
           setHistoricalData(data);

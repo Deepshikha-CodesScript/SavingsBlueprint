@@ -3,6 +3,9 @@ import "../styles/styles.css";
 
 function Navbar() {
   const navigate = useNavigate();
+  const user = JSON.parse(
+  localStorage.getItem("user")
+);
 
   const menuItems = [
     {
@@ -47,6 +50,10 @@ function Navbar() {
   // Logout Function
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
+     localStorage.removeItem("user");
+
+  // navigate("/login");
+  window.location.reload();
 
     // Reload app
     window.location.reload();
@@ -83,6 +90,9 @@ function Navbar() {
 
         {/* User Section */}
         <div className="sb-user-section">
+            <span className="sb-user-name">
+    Welcome, {user?.name || "User"}
+  </span>
           <button className="sb-btn" onClick={handleLogout}>
             Logout
           </button>

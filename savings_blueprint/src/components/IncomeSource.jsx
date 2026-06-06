@@ -66,11 +66,6 @@ const IncomeSource = () => {
 
 {salarySource && (
   <div className="selected-source-box">
-
-    <p className="selected-source">
-      Selected Source: <strong>{salarySource}</strong>
-    </p>
-
     {/* PART TIME JOB */}
     {salarySource === "Part-Time Job" && (
       <button

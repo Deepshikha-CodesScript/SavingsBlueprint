@@ -40,6 +40,8 @@ const Login = ({ setIsAuthenticated }) => {
 
       // Save Token
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user)
+);
 
       // Authentication State
       localStorage.setItem("isAuthenticated", "true");
