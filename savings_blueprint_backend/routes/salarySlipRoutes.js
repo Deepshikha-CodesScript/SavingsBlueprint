@@ -1,7 +1,5 @@
 const express = require("express");
-
 const router = express.Router();
-
 const SalarySlipMonthWise = require("../models/SalarySlipMonthWise");
 const authMiddleware =
   require("../middleware/authMiddleware");

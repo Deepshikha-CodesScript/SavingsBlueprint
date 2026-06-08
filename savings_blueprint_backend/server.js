@@ -3,12 +3,13 @@ const cors = require("cors");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
-
 const authRoutes = require("./routes/authRoutes");
 const salarySlipRoutes = require("./routes/salarySlipRoutes");
-
 const personalSalaryRoutes = require("./routes/personalSalaryRoutes");
 const otherIncomeRoutes = require("./routes/otherIncomeRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const googleAuthRoutes =
+  require("./routes/googleAuthRoutes");
 
 const app = express();
 
@@ -29,6 +30,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/salaryslip", salarySlipRoutes);
 app.use("/api/personalsalary", personalSalaryRoutes);
 app.use("/api/otherincome", otherIncomeRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use(
+  "/api/authr",
+  googleAuthRoutes
+);
 
 
 // Server

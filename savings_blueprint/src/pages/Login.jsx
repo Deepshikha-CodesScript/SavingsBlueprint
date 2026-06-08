@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { GoogleLogin } from "@react-oauth/google";
 
 
 const Login = ({ setIsAuthenticated }) => {
@@ -26,22 +27,13 @@ const Login = ({ setIsAuthenticated }) => {
 
     setError("");
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email: formData.email,
-          password: formData.password,
-        }
-      );
+    try { const res = await axios.post("http://localhost:5000/api/auth/login", { email: formData.email, password: formData.password, });
 
       // Success Message
       alert(res.data.message);
-
       // Save Token
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user)
-);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       // Authentication State
       localStorage.setItem("isAuthenticated", "true");
@@ -49,7 +41,6 @@ const Login = ({ setIsAuthenticated }) => {
 
       // Redirect
       navigate("/");
-
     } catch (error) {
 
       setError(
@@ -58,6 +49,19 @@ const Login = ({ setIsAuthenticated }) => {
 
     }
   };
+  const handleSuccess = async (
+  credentialResponse
+) => {
+  const res = await axios.post(
+    "http://localhost:5000/api/authr/google",
+    {
+      credential:
+        credentialResponse.credential,
+    }
+  );
+
+  console.log(res.data);
+};
 
   return (
     <div className="login-page">
@@ -128,11 +132,22 @@ const Login = ({ setIsAuthenticated }) => {
           </Link>
 
           </p>
+           <GoogleLogin
+  onSuccess={(credentialResponse) => {
+    console.log(credentialResponse);
+  }}
+  onError={() => {
+    console.log("Login Failed");
+  }}
+/>
 
           </form>
+          
 
         </div>
+        
       </div>
+     
     </div>
   );
 };

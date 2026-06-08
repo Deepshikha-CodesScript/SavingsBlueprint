@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -51,7 +52,38 @@ const Register = () => {
       );
     }
   };
+  
 
+  const handleGoogleRegister = async (
+  credentialResponse
+) => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/authr/google",
+      {
+        credential:
+          credentialResponse.credential,
+      }
+    );
+
+    alert("Google Registration Successful");
+
+    localStorage.setItem(
+      "token",
+      res.data.token
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(res.data.user)
+    );
+
+    navigate("/");
+  } catch (err) {
+    console.error(err);
+    setError("Google Registration Failed");
+  }
+};
   return (
     <div className="login-page">
       <div className="login-container">
@@ -135,6 +167,21 @@ const Register = () => {
             >
               Register
             </button>
+
+            <div
+  style={{
+    marginTop: "15px",
+    display: "flex",
+    justifyContent: "center",
+  }}
+>
+  <GoogleLogin
+    onSuccess={handleGoogleRegister}
+    onError={() =>
+      console.log("Google Login Failed")
+    }
+  />
+</div>
 
             <p className="register-text">
               Already have an account?{" "}

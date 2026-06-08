@@ -1,54 +1,77 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+
 import "../styles/styles.css";
-// src/pages/DashboardManager.jsx
-import { useIncomeHistory } from '../hooks/useIncomeHistory';
-import FutureSavingsForecast from './FutureSavingsForecast';
 
 function Dashboard() {
-  const { historicalData, loading } = useIncomeHistory();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
 
-  if (loading) return <div>Loading records and analyzing trends...</div>;
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/dashboard",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+      setDashboardData(res.data);
+    } catch (error) {
+      console.error("Dashboard fetch error:", error);
+    } finally {
+      setDashboardLoading(false);
+    }
+  };
+
+  if (dashboardLoading) {
+    return <div>Loading dashboard...</div>;
+  }
 
   const stats = [
     {
       title: "Total Income",
-      amount: "₹1,25,000",
+      amount: `₹${dashboardData?.totalIncome || 0}`,
     },
     {
       title: "Total Savings",
-      amount: "₹48,000",
+      amount: `₹${dashboardData?.totalSavings || 0}`,
     },
     {
       title: "Monthly Expenses",
-      amount: "₹32,000",
+      amount: `₹${dashboardData?.totalExpenses || 0}`,
     },
     {
       title: "Future Goal Fund",
-      amount: "₹75,000",
+      amount: `₹${dashboardData?.goalFund || 0}`,
     },
   ];
 
   return (
     <div className="sb-container">
-
       {/* Dashboard Header */}
       <div className="dashboard-header">
-
         <h1 className="sb-page-title">
           Savings Dashboard
         </h1>
 
-        {/* Navigation Button */}
         <div className="dashboard-links">
-          <Link to="/incomeSource" className="dashboard-btn">
+          <Link
+            to="/incomeSource"
+            className="dashboard-btn"
+          >
             Open Income Page
           </Link>
         </div>
-
       </div>
 
-      {/* Top Cards */}
+      {/* Stats Cards */}
       <div className="sb-dashboard-grid">
         {stats.map((item, index) => (
           <div className="sb-card" key={index}>
@@ -65,7 +88,6 @@ function Dashboard() {
 
       {/* Dashboard Content */}
       <div className="sb-dashboard-content">
-
         {/* Recent Transactions */}
         <div className="sb-card">
           <h2 className="sb-section-title">
@@ -83,31 +105,42 @@ function Dashboard() {
             </thead>
 
             <tbody>
-              <tr>
-                <td>16 May 2026</td>
-                <td>Salary</td>
-                <td>₹85,000</td>
-                <td>Received</td>
-              </tr>
+              {dashboardData?.recentTransactions?.length > 0 ? (
+                dashboardData.recentTransactions.map(
+                  (item) => (
+                    <tr key={item._id}>
+                      <td>
+                        {new Date(
+                          item.createdAt
+                        ).toLocaleDateString()}
+                      </td>
 
-              <tr>
-                <td>15 May 2026</td>
-                <td>Rent</td>
-                <td>₹15,000</td>
-                <td>Paid</td>
-              </tr>
+                      {/* <td>
+                        {item.category || "Salary"}
+                      </td> */}
+                      
+                     <td>{item.month}</td>
+                     <td> ₹{item.netPay || 0}</td>
 
-              <tr>
-                <td>14 May 2026</td>
-                <td>Investments</td>
-                <td>₹10,000</td>
-                <td>Saved</td>
-              </tr>
+                      <td>
+                        {item.status || "Received"}
+                      </td>
+                      <td>Processed</td>
+                    </tr>
+                  )
+                )
+              ) : (
+                <tr>
+                  <td colSpan="4">
+                    No transactions found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Goal Tracker */}
+        {/* Goal Tracking */}
         <div className="sb-card">
           <h2 className="sb-section-title">
             Goal Tracking
@@ -154,11 +187,14 @@ function Dashboard() {
               ></div>
             </div>
           </div>
-
         </div>
       </div>
-      <Link to="/income">Income</Link>
-        return <FutureSavingsForecast historicalData={historicalData} />;
+
+      <div style={{ marginTop: "20px" }}>
+        <Link to="/income">
+          Go To Income Page
+        </Link>
+      </div>
     </div>
   );
 }
