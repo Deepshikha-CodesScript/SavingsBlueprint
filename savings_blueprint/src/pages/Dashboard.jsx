@@ -8,12 +8,14 @@ function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
 
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {
     try {
+      const token = localStorage.getItem("token");
       const res = await axios.get(
         "http://localhost:5000/api/dashboard",
       {

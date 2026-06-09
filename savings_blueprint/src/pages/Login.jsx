@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
+import { loadFacebookSDK }
+  from "../utils/facebookSDK";
 
 
 const Login = ({ setIsAuthenticated }) => {
@@ -49,20 +51,130 @@ const Login = ({ setIsAuthenticated }) => {
 
     }
   };
-  const handleSuccess = async (
+
+const handleSuccess = async (
   credentialResponse
 ) => {
-  const res = await axios.post(
-    "http://localhost:5000/api/authr/google",
-    {
-      credential:
-        credentialResponse.credential,
-    }
-  );
+  try {
+    console.log(
+      "Google Response:",
+      credentialResponse
+    );
 
-  console.log(res.data);
+    console.log(
+      "Credential:",
+      credentialResponse?.credential
+    );
+
+    const res = await axios.post(
+      "http://localhost:5000/api/authr/google",
+      {
+        credential:
+          credentialResponse.credential,
+      }
+    );
+
+    console.log(
+      "Backend Response:",
+      res.data
+    );
+
+    localStorage.setItem(
+      "token",
+      res.data.token
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(res.data.user)
+    );
+
+    localStorage.setItem(
+      "isAuthenticated",
+      "true"
+    );
+
+    setIsAuthenticated(true);
+
+    navigate("/");
+  } catch (err) {
+    console.error(
+      "Google Login Error:",
+      err
+    );
+
+    setError(
+      err.response?.data?.message ||
+        "Google Login Failed"
+    );
+  }
 };
 
+
+const handleFacebookLogin =
+  async () => {
+    try {
+      const FB =
+        await loadFacebookSDK();
+
+      FB.login(
+        async (response) => {
+          if (
+            response.authResponse
+          ) {
+            const res =
+              await axios.post(
+                "http://localhost:5000/api/authrf/facebook",
+                {
+                  accessToken:
+                    response.authResponse
+                      .accessToken,
+                }
+              );
+
+            localStorage.setItem(
+              "token",
+              res.data.token
+            );
+
+              // Save authentication state
+    localStorage.setItem(
+      "isAuthenticated",
+      "true"
+    );
+
+            localStorage.setItem(
+              "user",
+              JSON.stringify(
+                res.data.user
+              )
+            );
+
+            setIsAuthenticated(
+              true
+            );
+
+            navigate("/");
+          }
+        },
+        {
+          scope:
+            "public_profile,email",
+        }
+      );
+    } catch (error) {
+  console.error(
+    "Facebook Login Error:",
+    error.response?.data ||
+      error.message
+  );
+
+  setError(
+    error.response?.data?.message ||
+    "Facebook Login Failed"
+  );
+}
+  };
   return (
     <div className="login-page">
       <div className="login-container">
@@ -132,14 +244,15 @@ const Login = ({ setIsAuthenticated }) => {
           </Link>
 
           </p>
-           <GoogleLogin
-  onSuccess={(credentialResponse) => {
-    console.log(credentialResponse);
-  }}
-  onError={() => {
-    console.log("Login Failed");
-  }}
-/>
+ <GoogleLogin onSuccess={handleSuccess} onError={() => { console.log("Login Failed");
+    setError("Google Login Failed");}}/>
+    <button  type="button"
+  onClick={
+    handleFacebookLogin
+  }
+>
+  Continue with Facebook
+</button>
 
           </form>
           

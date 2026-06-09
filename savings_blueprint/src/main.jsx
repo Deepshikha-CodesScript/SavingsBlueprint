@@ -5,10 +5,18 @@ import App from "./App";
 import "./index.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+console.log(
+  "Google Client ID:",
+  import.meta.env.VITE_GOOGLE_CLIENT_ID
+);console.log(
+  "Facebook App ID:",
+  import.meta.env
+    .VITE_FACEBOOK_APP_ID
+);
 ReactDOM.createRoot(document.getElementById("root")).render(
  
   <React.StrictMode>
-     <GoogleOAuthProvider clientId="import.meta.env.VITE_GOOGLE_CLIENT_ID">
+     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <BrowserRouter>
       <App />
       

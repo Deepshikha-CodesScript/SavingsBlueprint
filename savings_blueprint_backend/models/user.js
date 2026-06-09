@@ -18,16 +18,25 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    provider: {
-      type: String,
-      enum: ["local", "google"],
-      default: "local",
-    },
+   provider: {
+  type: String,
+  enum: [
+    "local",
+    "google",
+    "facebook",
+  ],
+  default: "local",
+},
 
     googleId: {
       type: String,
       default: null,
     },
+
+    facebookId: {
+  type: String,
+  default: null,
+},
   },
   {
     timestamps: true,

@@ -10,8 +10,17 @@ const otherIncomeRoutes = require("./routes/otherIncomeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const googleAuthRoutes =
   require("./routes/googleAuthRoutes");
+const fbauthRoutes =
+  require("./routes/fbauthRoutes");
 
-const app = express();
+
+  const app = express();
+app.use(
+  "/api/authrf",
+  fbauthRoutes
+);
+
+
 
 // Middleware
 app.use(cors());
