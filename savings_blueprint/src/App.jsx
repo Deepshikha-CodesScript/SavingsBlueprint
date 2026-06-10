@@ -76,7 +76,7 @@ function App() {
 
                   <Route
                     path="/savings"
-                    element={<Savings />}
+                    element={<Savings />}     
                   />
 
                   <Route
