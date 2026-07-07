@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../models/user");
 router.post(
   "/facebook",
   async (req, res) => {
