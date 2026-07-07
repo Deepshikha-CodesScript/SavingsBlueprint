@@ -2012,6 +2012,90 @@ body {
 
 
 
+
+
+
+
+
+.social-login-container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.google-login-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.social-divider {
+  width: 100%;
+  text-align: center;
+  position: relative;
+}
+
+.social-divider span {
+  background: #fff;
+  padding: 0 10px;
+  color: #777;
+  font-size: 14px;
+}
+
+.social-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  width: 35%;
+  height: 1px;
+  background: #ddd;
+}
+
+.social-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 10%;
+  width: 35%;
+  height: 1px;
+  background: #ddd;
+}
+
+.facebook-btn {
+  width: 280px;
+  height: 42px;
+  border: none;
+  border-radius: 6px;
+  background: #1877f2;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.facebook-btn:hover {
+  background: #166fe5;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .bottom-actions {
   display: flex;
   gap: 12px;

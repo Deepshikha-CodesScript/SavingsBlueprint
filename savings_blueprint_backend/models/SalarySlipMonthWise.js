@@ -1,84 +1,8 @@
-// const mongoose = require("mongoose");
-
-// const earningSchema = new mongoose.Schema({
-//   label: String,
-//   amount: Number,
-// });
-
-// const deductionSchema = new mongoose.Schema({
-//   label: String,
-//   amount: Number,
-// });
-
-// const salarySlipSchema = new mongoose.Schema(
-//   {
-//     empName: {
-//       type: String,
-//       required: true,
-//     },
-
-//     designation: {
-//       type: String,
-//     },
-
-//     department: {
-//       type: String,
-//     },
-
-//     month: {
-//       type: String,
-//       required: true,
-//     },
-
-//     financialYear: {
-//       type: String,
-//     },
-
-//     retirementDate: {
-//       type: String,
-//     },
-
-//     earnings: [earningSchema],
-
-//     deductions: [deductionSchema],
-
-//     grossEarnings: {
-//       type: Number,
-//       default: 0,
-//     },
-
-//     totalDeductions: {
-//       type: Number,
-//       default: 0,
-//     },
-
-//     netPay: {
-//       type: Number,
-//       default: 0,
-//     },
-//   },
-//   {
-//     timestamps: true,
-//     collection: "salaryslipmonthwise",
-//   }
-
-  
-// );
-
-// module.exports = mongoose.model(
-//   "SalarySlipMonthWise",
-//   salarySlipSchema
-// );
-
 const mongoose = require("mongoose");
-
 const SalarySlipSchema = new mongoose.Schema(
   {
      userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+      type: mongoose.Schema.Types.ObjectId, ref: "User", required: true,},
     empName: String,
     designation: String,
     department: String,
@@ -86,18 +10,8 @@ const SalarySlipSchema = new mongoose.Schema(
     financialYear: String,
     retirementDate: Date,
 
-    earnings: [
-      {
-        label: String,
-        amount: Number,
-      },
-    ],
-
-    deductions: [
-      {
-        label: String,
-        amount: Number,
-      },
+    earnings: [{label: String, amount: Number,},],
+    deductions: [{label: String,amount: Number,},
     ],
 
     personalSalary: {

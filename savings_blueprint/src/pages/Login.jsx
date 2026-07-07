@@ -52,32 +52,54 @@ const Login = ({ setIsAuthenticated }) => {
     }
   };
 
-const handleSuccess = async (
-  credentialResponse
-) => {
+// Google Login Success
+const handleSuccess = async (credentialResponse) => {
   try {
-    console.log(
-      "Google Response:",
-      credentialResponse
-    );
-
-    console.log(
-      "Credential:",
-      credentialResponse?.credential
-    );
+    console.log("Google Response:", credentialResponse);
 
     const res = await axios.post(
       "http://localhost:5000/api/authr/google",
       {
-        credential:
-          credentialResponse.credential,
+        credential: credentialResponse.credential,
       }
     );
 
-    console.log(
-      "Backend Response:",
-      res.data
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem(
+      "user",
+      JSON.stringify(res.data.user)
     );
+    localStorage.setItem(
+      "isAuthenticated",
+      "true"
+    );
+
+    setIsAuthenticated(true);
+    navigate("/");
+  } catch (err) {
+    console.error(
+      "Google Login Error:",
+      err
+    );
+
+    setError(
+      err.response?.data?.message ||
+        "Google Login Failed"
+    );
+  }
+};
+
+// Facebook Response Handler
+const handleFacebookResponse = async (
+  response
+) => {
+  try {
+    if (!response.authResponse) {
+      setError("Facebook Login Cancelled");
+      return;
+    }
+
+    const res = await axios.post("http://localhost:5000/api/authrf/facebook",{accessToken:response.authResponse.accessToken,});
 
     localStorage.setItem(
       "token",
@@ -97,84 +119,48 @@ const handleSuccess = async (
     setIsAuthenticated(true);
 
     navigate("/");
-  } catch (err) {
+  } catch (error) {
     console.error(
-      "Google Login Error:",
-      err
+      "Facebook Login Error:",
+      error.response?.data || error.message
     );
 
     setError(
-      err.response?.data?.message ||
-        "Google Login Failed"
+      error.response?.data?.message ||
+        "Facebook Login Failed"
     );
   }
 };
 
+// Facebook Login Button Handler
+const handleFacebookLogin = async () => {
+  try {
+    const FB = await loadFacebookSDK();
 
-const handleFacebookLogin =
-  async () => {
-    try {
-      const FB =
-        await loadFacebookSDK();
-
-      FB.login(
-        async (response) => {
-          if (
-            response.authResponse
-          ) {
-            const res =
-              await axios.post(
-                "http://localhost:5000/api/authrf/facebook",
-                {
-                  accessToken:
-                    response.authResponse
-                      .accessToken,
-                }
-              );
-
-            localStorage.setItem(
-              "token",
-              res.data.token
-            );
-
-              // Save authentication state
-    localStorage.setItem(
-      "isAuthenticated",
-      "true"
+    FB.login(
+      (response) => {
+        handleFacebookResponse(
+          response
+        );
+      },
+      {
+        scope:
+          "public_profile,email",
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Facebook Login Error:",
+      error.response?.data || error.message
     );
 
-            localStorage.setItem(
-              "user",
-              JSON.stringify(
-                res.data.user
-              )
-            );
-
-            setIsAuthenticated(
-              true
-            );
-
-            navigate("/");
-          }
-        },
-        {
-          scope:
-            "public_profile,email",
-        }
-      );
-    } catch (error) {
-  console.error(
-    "Facebook Login Error:",
-    error.response?.data ||
-      error.message
-  );
-
-  setError(
-    error.response?.data?.message ||
-    "Facebook Login Failed"
-  );
-}
-  };
+    setError(
+      error.response?.data?.message ||
+        "Facebook Login Failed"
+    );
+  }
+};
+  
   return (
     <div className="login-page">
       <div className="login-container">
@@ -244,15 +230,29 @@ const handleFacebookLogin =
           </Link>
 
           </p>
- <GoogleLogin onSuccess={handleSuccess} onError={() => { console.log("Login Failed");
-    setError("Google Login Failed");}}/>
-    <button  type="button"
-  onClick={
-    handleFacebookLogin
-  }
->
-  Continue with Facebook
-</button>
+<div className="social-login-container">
+  <div className="google-login-wrapper">
+    <GoogleLogin
+      onSuccess={handleSuccess}
+      onError={() => {
+        console.log("Login Failed");
+        setError("Google Login Failed");
+      }}
+    />
+  </div>
+
+  <div className="social-divider">
+    <span>OR</span>
+  </div>
+
+  <button
+    type="button"
+    className="facebook-btn"
+    onClick={handleFacebookLogin}
+  >
+    Continue with Facebook
+  </button>
+</div>
 
           </form>
           

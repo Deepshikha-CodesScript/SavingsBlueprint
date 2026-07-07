@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
+import { loadFacebookSDK } from "../utils/facebookSDK";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -82,6 +83,56 @@ const Register = () => {
   } catch (err) {
     console.error(err);
     setError("Google Registration Failed");
+  }
+};
+
+const handleFacebookRegister = async () => {
+  try {
+    const FB = await loadFacebookSDK();
+
+    FB.login(
+      function (response) {
+        console.log("FB Response:", response);
+
+        if (response.authResponse) {
+          axios
+            .post(
+              "http://localhost:5000/api/authrf/facebook",
+              {
+                accessToken:
+                  response.authResponse
+                    .accessToken,
+              }
+            )
+            .then((res) => {localStorage.setItem("token",res.data.token);
+
+              localStorage.setItem("user",JSON.stringify(res.data.user));
+
+              alert(
+                "Facebook Registration Successful"
+              );
+
+              navigate("/");
+            })
+            .catch((err) => {
+              console.error(err);
+              setError(
+                "Facebook Registration Failed"
+              );
+            });
+        } else {
+          console.log(
+            "User cancelled Facebook login"
+          );
+        }
+      },
+      {
+        scope: "email,public_profile",
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    setError("Facebook Login Failed");
   }
 };
   return (
@@ -167,6 +218,21 @@ const Register = () => {
             >
               Register
             </button>
+
+            <div
+  style={{
+    marginTop: "15px",
+    display: "flex",
+    justifyContent: "center",
+  }}
+>
+  <button
+    type="button"
+    onClick={handleFacebookRegister}
+     className="facebook-btn" >
+    Continue with Facebook
+  </button>
+</div>
 
             <div
   style={{

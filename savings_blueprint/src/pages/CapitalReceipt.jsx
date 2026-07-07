@@ -176,6 +176,12 @@ const CapitalReceipt = ({
 
 </div>
 
+<div className="capital-total-summary">
+  <div className="total-block">
+    <span>Total Capital Receipt:</span>
+    <strong>₹ {(totalCapitalReceipt + additionalTotal).toFixed(2)}</strong>
+  </div>
+</div>
     </div>
   );
 };

@@ -26,7 +26,7 @@ const SalarySlipPage = () => {
     designation: "",
     department: "",
     financialYear: "2025-2026",
-    month: "03/2017",
+    month: "Apr",
     retirementDate: "",
   });
 
@@ -311,6 +311,11 @@ const SalarySlipPage = () => {
 
 }, []);
 
+useEffect(() => {
+  console.log("Saved Salary Data:", savedSalaryData);
+}, [savedSalaryData]);
+console.log(savedSalaryData)
+
   return (
 
     <div className="salary-slip-page-container">
@@ -417,37 +422,27 @@ const SalarySlipPage = () => {
         <SalaryTable
 
           months={months}
-
           earnings={earnings}
+          mandatoryDeductions={mandatoryDeductions}
 
-          mandatoryDeductions={
-            mandatoryDeductions
-          }
+          personalDeductions={personalDeductions}
 
-          personalDeductions={
-            personalDeductions
-          }
+          otherIncomeHeads={otherIncomeHeads}
 
-          otherIncomeHeads={
-            otherIncomeHeads
-          }
+          capitalReceiptHeads={capitalReceiptHeads}
 
-          capitalReceiptHeads={
-            capitalReceiptHeads
-          }
+          annualIncomeData={annualIncomeData}
 
-          annualIncomeData={
-            annualIncomeData
-          }
-
-          handleAnnualDataChange={
-            handleAnnualDataChange
+          handleAnnualDataChange={handleAnnualDataChange
           }
            savedSalaryData={savedSalaryData}
+           
 
         />
+        
 
       )}
+      console.log("Saved Salary Data:", savedSalaryData);
 
     </div>
 

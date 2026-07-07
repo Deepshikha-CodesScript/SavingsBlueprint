@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 import "../styles/styles.css";
-
 const SalaryTable = ({
   months,
   earnings,
@@ -14,38 +12,23 @@ const SalaryTable = ({
   handleAnnualDataChange,
   savedSalaryData,
 }) => {
-
-  const columns = [
-    ...earnings.map((item) => ({
+const salaryData = salaryHistory.length > 0 ? salaryHistory : savedSalaryData;
+console.log("salaryData =", salaryData);
+const columns = React.useMemo(() => {
+  if (!salaryData?.length) return [];
+  const firstRecord = salaryData[0];
+  return [
+    ...(firstRecord.earnings || []).map((item) => ({
       key: "earnings",
       label: item.label,
     })),
-
-    ...mandatoryDeductions.map((label) => ({
-      key: "mandatory",
-      label,
+    ...(firstRecord.deductions || []).map((item) => ({
+      key: "deductions",
+      label: item.label,
       isDeduction: true,
-    })),
-
-    ...personalDeductions.map((label) => ({
-      key: "personal",
-      label,
-      isDeduction: true,
-    })),
-
-    ...otherIncomeHeads.map((label) => ({
-      key: "otherIncome",
-      label,
-      isIncome: true,
-    })),
-
-    ...capitalReceiptHeads.map((label) => ({
-      key: "capitalReceipt",
-      label,
     })),
   ];
-
- 
+}, [salaryData]); 
   const getVerticalColumnTotal = (category, subField) => {
     return months.reduce((totalSum, _, mIndex) => {
       return (
@@ -100,23 +83,18 @@ const SalaryTable = ({
       "value"
     );
 
-   const [salaryHistory, setSalaryHistory] =
-  useState([]);
+   const [salaryHistory, setSalaryHistory] =  useState([]);
+  
 
   
-  useEffect(() => {
-
-  fetchSalaryHistory();
-
-}, []);
-
+  useEffect(() => {fetchSalaryHistory();}, []);
+useEffect(() => {console.log("Salary History:", salaryData);}, [salaryData]);
 const fetchSalaryHistory = async () => {
 
   try {
-
      const token = localStorage.getItem("token");
-
-    const res = await axios.get(
+     console.log("Token:", token);
+     const res = await axios.get(
       "http://localhost:5000/api/salaryslip/history",
          {
         headers: {
@@ -124,34 +102,28 @@ const fetchSalaryHistory = async () => {
         },
       }
     );
-
     setSalaryHistory(res.data.data);
-
   } catch (error) {
-
     console.log(error);
-
   }
-
 };
 
+const getMonthData = (monthName) => {
+  return salaryData.find(
+    (item) => item.month === monthName
+  );
+};
   return (
     <div className="advanced-income-section">
-
       <h2>Actual Salary And Income</h2>
-
       <div className="advanced-table-wrapper">
-
         <table className="advanced-income-table">
-
           <thead>
             <tr>
               <th>Month</th>
-
               {columns.map((col, idx) => (
                 <th key={idx}>{col.label}</th>
               ))}
-
               <th>Tax Exemption</th>
               <th>Total Earnings</th>
               <th>Total Deductions</th>
@@ -160,13 +132,30 @@ const fetchSalaryHistory = async () => {
               <th>Net Salary</th>
             </tr>
           </thead>
-
           <tbody>
-
             {months.map((month, mIndex) => {
+console.log("Table month:", month);
+salaryData.forEach((item) => {console.log("Saved month:", item.month);});
+const savedMonth =salaryData.find((item) =>item.month?.trim().toLowerCase() === month?.trim().toLowerCase());
+console.log("Current Row Month:", month);
+console.log("Found Record:", savedMonth);
+if (savedMonth) {console.log("MATCH FOUND:",month,savedMonth.netPay);
+}
+const rowData = {
+  earnings: {},
+  deductions: {},
+};
 
-              const rowData =
-                annualIncomeData[mIndex] || {};
+savedMonth?.earnings?.forEach((e) => {rowData.earnings[e.label?.trim().toLowerCase()] =Number(e.amount);});
+
+savedMonth?.deductions?.forEach((d) => {
+rowData.deductions[d.label] = Number(d.amount);
+});
+
+console.log("Table Month:", month);
+console.log("Saved Data:", salaryData);
+
+
 
               const calcSum = (cat, items) =>
                 items.reduce(
@@ -180,20 +169,13 @@ const fetchSalaryHistory = async () => {
                   0
                 );
 
-              const earnTotal = calcSum(
-                "earnings",
-                earnings
-              );
 
-              const deductTotal =
-                calcSum(
-                  "mandatory",
-                  mandatoryDeductions
-                ) +
-                calcSum(
-                  "personal",
-                  personalDeductions
-                );
+
+                const earnTotal = savedMonth?.grossEarnings || 0;
+                const deductTotal = savedMonth?.totalDeductions || 0;
+                const netSalary = savedMonth?.netPay || 0;
+
+              
 
               const otherTotal = calcSum(
                 "otherIncome",
@@ -205,10 +187,14 @@ const fetchSalaryHistory = async () => {
                 capitalReceiptHeads
               );
 
-              const netSalary =
-                earnTotal -
-                deductTotal +
-                otherTotal;
+
+     
+
+
+              // const netSalary =
+              //   earnTotal -
+              //   deductTotal +
+              //   otherTotal;
 
               return (
                 <tr
@@ -223,9 +209,7 @@ const fetchSalaryHistory = async () => {
                   {columns.map((col, cIdx) => {
 
                     const value =
-                      rowData[col.key]?.[
-                        col.label
-                      ] || "";
+  rowData[col.key]?.[col.label] || "";
 
                     return (
                       <td key={cIdx}>
@@ -417,8 +401,8 @@ const fetchSalaryHistory = async () => {
 
           <tbody>
 
-           {savedSalaryData?.length > 0 ? (
-              savedSalaryData.map(
+           {salaryData?.length > 0 ? (
+              salaryData.map(
                 (item, index) => (
                   <tr key={index}>
                     <td>{item.month}</td>
