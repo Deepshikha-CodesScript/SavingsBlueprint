@@ -94,28 +94,13 @@ const handleFacebookResponse = async (
   response
 ) => {
   try {
-    if (!response.authResponse) {
-      setError("Facebook Login Cancelled");
-      return;
+    if (!response.authResponse) {setError("Facebook Login Cancelled");return;
     }
 
     const res = await axios.post("http://localhost:5000/api/authrf/facebook",{accessToken:response.authResponse.accessToken,});
-
-    localStorage.setItem(
-      "token",
-      res.data.token
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(res.data.user)
-    );
-
-    localStorage.setItem(
-      "isAuthenticated",
-      "true"
-    );
-
+    localStorage.setItem("token",res.data.token);
+    localStorage.setItem("user",JSON.stringify(res.data.user));
+    localStorage.setItem("isAuthenticated","true");
     setIsAuthenticated(true);
 
     navigate("/");

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const capitalReceiptSchema = new mongoose.Schema({
   empName: {
     type: String,

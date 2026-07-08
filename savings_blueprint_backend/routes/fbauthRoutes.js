@@ -15,11 +15,7 @@ router.post(
           `https://graph.facebook.com/me?fields=id,name,email&access_token=${accessToken}`
         );
 
-      const {
-        id,
-        name,
-        email,
-      } = fbResponse.data;
+      const {id,name,email,} = fbResponse.data;
 
       let user =
         await User.findOne({
