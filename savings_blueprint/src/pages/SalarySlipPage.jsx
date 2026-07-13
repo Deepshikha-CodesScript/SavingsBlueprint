@@ -16,11 +16,10 @@ const SalarySlipPage = () => {
   const [savedSalaryData, setSavedSalaryData] = useState([]);
 
   /* =========================================
-     FORM DATA
+     EMPLOYEE DETAILS (Shared across all components)
   ========================================= */
 
-
-  const [formData, setFormData] = React.useState({
+  const [employeeDetails, setEmployeeDetails] = React.useState({
     empCode: "00020602",
     empName: "Chiluveru Sinu Jangaonkar",
     designation: "",
@@ -137,20 +136,21 @@ const SalarySlipPage = () => {
         personal: {},
         otherIncome: {},
         capitalReceipt: {},
+        personalSalary: {},
         taxExemption: {},
       }))
     );
 
   /* =========================================
-     FORM CHANGE
+     EMPLOYEE DETAILS CHANGE
   ========================================= */
 
-  const handleChange = (e) => {
+  const handleEmployeeDetailsChange = (e) => {
 
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setEmployeeDetails({
+      ...employeeDetails,
       [name]: value,
     });
   };
@@ -311,9 +311,107 @@ const SalarySlipPage = () => {
 
 }, []);
 
+// Fetch PersonalSalary, OtherIncome, CapitalReceipt data for all months
+useEffect(() => {
+  console.log("Data fetching useEffect triggered, employeeDetails.empName:", employeeDetails.empName);
+
+  const fetchAllMonthlyData = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    console.log("Fetching monthly data for employee:", employeeDetails.empName);
+
+    try {
+      // Fetch data for each month
+      const monthlyDataPromises = months.map(async (month) => {
+        try {
+          // Fetch Personal Salary
+          const personalRes = await axios.get(
+            `http://localhost:5000/api/personalsalary/get?empName=${encodeURIComponent(employeeDetails.empName)}&month=${encodeURIComponent(month)}`,
+            config
+          );
+          console.log(`Personal Salary for ${month}:`, personalRes.data);
+
+          // Fetch Other Income
+          const otherIncomeRes = await axios.get(
+            `http://localhost:5000/api/otherincome/get?empName=${encodeURIComponent(employeeDetails.empName)}&month=${encodeURIComponent(month)}`,
+            config
+          );
+          console.log(`Other Income for ${month}:`, otherIncomeRes.data);
+
+          // Fetch Capital Receipt
+          const capitalRes = await axios.get(
+            `http://localhost:5000/api/capitalreceipt/get?empName=${encodeURIComponent(employeeDetails.empName)}&month=${encodeURIComponent(month)}`,
+            config
+          );
+          console.log(`Capital Receipt for ${month}:`, capitalRes.data);
+
+          return {
+            month,
+            personalSalary: personalRes.data.success ? personalRes.data.data.personalSalary : {},
+            otherEarnings: personalRes.data.success ? personalRes.data.data.otherEarnings : [],
+            otherDeductions: personalRes.data.success ? personalRes.data.data.otherDeductions : [],
+            otherIncome: otherIncomeRes.data.success ? otherIncomeRes.data.data.otherIncome : {},
+            additionalIncome: otherIncomeRes.data.success ? otherIncomeRes.data.data.additionalIncome : [],
+            capitalReceipt: capitalRes.data.success ? capitalRes.data.data.capitalReceipt : {},
+            additionalCapitalReceipts: capitalRes.data.success ? capitalRes.data.data.additionalCapitalReceipts : [],
+          };
+        } catch (error) {
+          console.log(`Error fetching data for ${month}:`, error);
+          return {
+            month,
+            personalSalary: {},
+            otherEarnings: [],
+            otherDeductions: [],
+            otherIncome: {},
+            additionalIncome: [],
+            capitalReceipt: {},
+            additionalCapitalReceipts: [],
+          };
+        }
+      });
+
+      const monthlyData = await Promise.all(monthlyDataPromises);
+      console.log("All monthly data:", monthlyData);
+
+      // Update annualIncomeData with fetched data
+      setAnnualIncomeData(prev => {
+        const updated = [...prev];
+        monthlyData.forEach((data, index) => {
+          updated[index] = {
+            ...updated[index],
+            personalSalary: data.personalSalary,
+            otherIncome: data.otherIncome,
+            capitalReceipt: data.capitalReceipt,
+          };
+        });
+        console.log("Updated annualIncomeData:", updated);
+        return updated;
+      });
+
+    } catch (error) {
+      console.error("Error fetching monthly data:", error);
+    }
+  };
+
+  if (employeeDetails.empName) {
+    fetchAllMonthlyData();
+  }
+}, [employeeDetails.empName]);
+
 useEffect(() => {
   console.log("Saved Salary Data:", savedSalaryData);
 }, [savedSalaryData]);
+
+useEffect(() => {
+  console.log("Annual Income Data:", annualIncomeData);
+}, [annualIncomeData]);
 console.log(savedSalaryData)
 
   return (
@@ -364,16 +462,17 @@ console.log(savedSalaryData)
 
         <SalarySlip
 
-          formData={formData}
-          handleChange={handleChange}
+          employeeDetails={employeeDetails}
+          handleEmployeeDetailsChange={handleEmployeeDetailsChange}
 
 
           annualIncomeData={annualIncomeData}
+          setAnnualIncomeData={setAnnualIncomeData}
 
           earnings={earnings}
           deductions={deductions}
 
-          setFormData={setFormData}
+          setEmployeeDetails={setEmployeeDetails}
           setEarnings={setEarnings}
           setDeductions={setDeductions}
 

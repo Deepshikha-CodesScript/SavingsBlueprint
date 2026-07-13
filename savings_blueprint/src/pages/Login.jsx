@@ -56,26 +56,24 @@ const Login = ({ setIsAuthenticated }) => {
 const handleSuccess = async (credentialResponse) => {
   try {
     console.log("Google Response:", credentialResponse);
-
-    const res = await axios.post(
-      "http://localhost:5000/api/authr/google",
-      {
-        credential: credentialResponse.credential,
-      }
-    );
-
+    const res = await axios.post("http://localhost:5000/api/authr/google",{credential: credentialResponse.credential,});
     localStorage.setItem("token", res.data.token);
     localStorage.setItem(
       "user",
-      JSON.stringify(res.data.user)
+      JSON.stringify({user:res.data.user, _id: res.data.user._id,
+    id: res.data.user._id,
+    name: res.data.user.name,
+    email: res.data.user.email,})
     );
     localStorage.setItem(
       "isAuthenticated",
       "true"
     );
-
     setIsAuthenticated(true);
     navigate("/");
+    console.log("LOGIN RESPONSE");
+console.log(res.data);
+console.log("Token:", res.data.token);
   } catch (err) {
     console.error(
       "Google Login Error:",
@@ -87,7 +85,9 @@ const handleSuccess = async (credentialResponse) => {
         "Google Login Failed"
     );
   }
+  
 };
+
 
 // Facebook Response Handler
 const handleFacebookResponse = async (

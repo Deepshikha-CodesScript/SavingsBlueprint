@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-
-import OtherIncome from "./OtherIncome";
-
 const PersonalSalary = ({
+employeeDetails,
 personalSalary,
 setPersonalSalary,
 otherEarnings,
@@ -11,79 +9,63 @@ otherDeductions,
 setOtherDeductions,
 }) => {
 
+  
 // Fixed Fields Change
-
-const handleFixedChange = (e) => {
-const { name, value } = e.target;
-
-```
-setPersonalSalary((prev) => ({
-  ...prev,
-  [name]: value,
-}));
-```
-
-};
-
-const [otherIncome, setOtherIncome] = useState({
-  partTimeJobSalary: "",
-  partTimeBusinessIncome: "",
-  tuitionAmount: "",
-  agriculturalIncome: "",
-  extraOccupationalIncome: "",
-  chitFundDividend: "",
-  licCommission: "",
-  shareTradingIncome: "",
-  stockDividend: "",
-});
-
-const [additionalIncome, setAdditionalIncome] = useState([
-  {
-    label: "",
-    amount: "",
-  },
-]);
+const handleFixedChange = ({ target: { name, value } }) => {
+  console.log("Typing:", name, value);
+  setPersonalSalary((prev) => ({...prev,[name]: value,}));};
+React.useEffect(() => {
+  console.log("personalSalary =", personalSalary);
+}, [personalSalary]);
 
 // Other Earnings
 
 const handleEarningChange = (index, field, value) => {
-const updated = [...otherEarnings];
-updated[index][field] = value;
-setOtherEarnings(updated);
+  setOtherEarnings((prev) =>
+    prev.map((item, i) =>
+      i === index
+        ? { ...item, [field]: value }
+        : item
+    )
+  );
 };
 
 const addEarningField = () => {
-setOtherEarnings([
-...otherEarnings,
-{ label: "", amount: "" },
-]);
+  setOtherEarnings((prev) => [
+    ...prev,
+    { label: "", amount: "" },
+  ]);
 };
 
 const removeEarningField = (index) => {
-setOtherEarnings(
-otherEarnings.filter((_, i) => i !== index)
-);
+  setOtherEarnings((prev) =>
+    prev.filter((_, i) => i !== index)
+  );
 };
 
 // Other Deductions
 
 const handleDeductionChange = (index, field, value) => {
-const updated = [...otherDeductions];
-updated[index][field] = value;
-setOtherDeductions(updated);
+  setOtherDeductions((prev) =>
+    prev.map((item, i) =>
+      i === index
+        ? { ...item, [field]: value }
+        : item
+    )
+  );
 };
 
 const addDeductionField = () => {
-setOtherDeductions([
-...otherDeductions,
-{ label: "", amount: "" },
-]);
+  setOtherDeductions((prev) => [
+    ...prev,
+    { label: "", amount: "" },
+  ]);
 };
 
 const removeDeductionField = (index) => {
-setOtherDeductions(
-otherDeductions.filter((_, i) => i !== index)
-);
+  setOtherDeductions((prev) =>
+    prev.filter((_, i) => i !== index)
+  );
 };
 
 // Totals
@@ -140,7 +122,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="overtimeAllowance"
-        value={personalSalary.overtimeAllowance}
+       value={personalSalary.overtimeAllowance || ""}
         onChange={handleFixedChange}
         placeholder="Overtime Allowance"
       />
@@ -148,7 +130,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="holidayAllowance"
-        value={personalSalary.holidayAllowance}
+        value={personalSalary.holidayAllowance || ""}
         onChange={handleFixedChange}
         placeholder="Holiday Allowance"
       />
@@ -156,7 +138,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="leaveEncashment"
-        value={personalSalary.leaveEncashment}
+        value={personalSalary.leaveEncashment || ""}
         onChange={handleFixedChange}
         placeholder="Leave Encashment"
       />
@@ -164,7 +146,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="taAllowance"
-        value={personalSalary.taAllowance}
+        value={personalSalary.taAllowance || ""}
         onChange={handleFixedChange}
         placeholder="TA Allowance"
       />
@@ -172,7 +154,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="bonus"
-        value={personalSalary.bonus}
+        value={personalSalary.bonus || ""}
         onChange={handleFixedChange}
         placeholder="Bonus"
       />
@@ -180,7 +162,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="exgratia"
-        value={personalSalary.exgratia}
+        value={personalSalary.exgratia || ""}
         onChange={handleFixedChange}
         placeholder="Exgratia"
       />
@@ -188,7 +170,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="arrears"
-        value={personalSalary.arrears}
+        value={personalSalary.arrears || ""}
         onChange={handleFixedChange}
         placeholder="Arrears"
       />
@@ -196,7 +178,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="loanTaken"
-        value={personalSalary.loanTaken}
+        value={personalSalary.loanTaken || ""}
         onChange={handleFixedChange}
         placeholder="Loan Taken"
       />
@@ -262,7 +244,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="loanRepayment"
-        value={personalSalary.loanRepayment}
+        value={personalSalary.loanRepayment || ""}
         onChange={handleFixedChange}
         placeholder="Loan Repayment / EMI"
       />
@@ -270,7 +252,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="licPremium"
-        value={personalSalary.licPremium}
+        value={personalSalary.licPremium || ""}
         onChange={handleFixedChange}
         placeholder="LIC Premium"
       />
@@ -278,7 +260,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="houseLoanEMI"
-        value={personalSalary.houseLoanEMI}
+        value={personalSalary.houseLoanEMI || ""}
         onChange={handleFixedChange}
         placeholder="House Loan EMI"
       />
@@ -286,7 +268,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="vehicleLoanEMI"
-        value={personalSalary.vehicleLoanEMI}
+        value={personalSalary.vehicleLoanEMI || ""}
         onChange={handleFixedChange}
         placeholder="Vehicle Loan EMI"
       />
@@ -294,7 +276,7 @@ return ( <div className="personal-salary-container">
       <input
         type="number"
         name="otherDeduction"
-        value={personalSalary.otherDeduction}
+        value={personalSalary.otherDeduction || ""}
         onChange={handleFixedChange}
         placeholder="Other Deduction"
       />
@@ -377,7 +359,7 @@ return ( <div className="personal-salary-container">
   <input
     type="date"
     name="expectedEndDate"
-    value={personalSalary.expectedEndDate}
+    value={personalSalary.expectedEndDate || ""}
     onChange={(e) =>
       setPersonalSalary({
         ...personalSalary,
@@ -390,7 +372,7 @@ return ( <div className="personal-salary-container">
     type="number"
     name="annualGrowthRate"
     placeholder="Annual Growth Rate (%)"
-    value={personalSalary.annualGrowthRate}
+    value={personalSalary.annualGrowthRate || ""}
     onChange={(e) =>
       setPersonalSalary({
         ...personalSalary,

@@ -6,63 +6,98 @@ const authMiddleware =
 /* =========================================
    SAVE SALARY SLIP
 ========================================= */
-
-
-
 router.post("/save", authMiddleware, async (req, res) => {
   try {
     const data = { ...req.body };
 
-    // 1. Helper function to deep convert empty strings "" to 0 or null for numeric objects
+    console.log("req.user =", req.user);
+
+    const authenticatedUserId =
+      req.user?._id ||
+      req.user?.id ||
+      req.user?.userId;
+
+    if (!authenticatedUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "Authenticated user ID is missing",
+      });
+    }
+
     const cleanNumericFields = (obj) => {
       if (!obj || typeof obj !== "object") return obj;
+
       const cleaned = {};
+
       for (const [key, value] of Object.entries(obj)) {
-        // If it's an empty string, turn it into 0 so your Number schema accepts it
         if (value === "") {
-          cleaned[key] = 0; 
-        } else if (typeof value === "object" && !Array.isArray(value)) {
+          cleaned[key] =  key === "expectedEndDate" ? null : 0;
+        } else if (
+          typeof value === "object" &&
+          value !== null &&
+          !Array.isArray(value)
+        ) {
           cleaned[key] = cleanNumericFields(value);
         } else {
           cleaned[key] = value;
         }
       }
+
       return cleaned;
     };
 
-    // 2. Clean parent categories
-    if (data.personalSalary) data.personalSalary = cleanNumericFields(data.personalSalary);
-    if (data.otherIncome) data.otherIncome = cleanNumericFields(data.otherIncome);
-    if (data.capitalReceipt) data.capitalReceipt = cleanNumericFields(data.capitalReceipt);
+    if (data.personalSalary) {
+      data.personalSalary =
+        cleanNumericFields(data.personalSalary);
+    }
 
-    // 3. Clean dynamic array heads (Filter out empty custom inputs)
+    if (data.otherIncome) {
+      data.otherIncome =
+        cleanNumericFields(data.otherIncome);
+    }
+
+    if (data.capitalReceipt) {
+      data.capitalReceipt =
+        cleanNumericFields(data.capitalReceipt);
+    }
+
     const filterEmptyArrays = (arr) => {
-      if (!Array.isArray(arr)) return arr;
+      if (!Array.isArray(arr)) return [];
+
       return arr
-        .map(item => ({
-          label: item.label || "",
-          amount: item.amount === "" ? 0 : Number(item.amount || 0)
+        .map((item) => ({
+          label: item?.label || "",
+          amount:
+            item?.amount === ""
+              ? 0
+              : Number(item?.amount || 0),
         }))
-        .filter(item => item.label.trim() !== ""); // don't save blank rows
+        .filter((item) => item.label.trim() !== "");
     };
 
-    if (data.earnings) data.earnings = filterEmptyArrays(data.earnings);
-    if (data.deductions) data.deductions = filterEmptyArrays(data.deductions);
-    if (data.otherEarnings) data.otherEarnings = filterEmptyArrays(data.otherEarnings);
-    if (data.otherDeductions) data.otherDeductions = filterEmptyArrays(data.otherDeductions);
-    if (data.additionalIncome) data.additionalIncome = filterEmptyArrays(data.additionalIncome);
-    if (data.additionalCapitalReceipts) data.additionalCapitalReceipts = filterEmptyArrays(data.additionalCapitalReceipts);
+    data.earnings = filterEmptyArrays(data.earnings);
+    data.deductions = filterEmptyArrays(data.deductions);
+    data.otherEarnings =
+      filterEmptyArrays(data.otherEarnings);
+    data.otherDeductions =
+      filterEmptyArrays(data.otherDeductions);
+    data.additionalIncome =
+      filterEmptyArrays(data.additionalIncome);
+    data.additionalCapitalReceipts =
+      filterEmptyArrays(
+        data.additionalCapitalReceipts
+      );
 
-    console.log("req.user =>", req.user);
-console.log("userId =>", req.user?.userId);
-console.log("Decoded User:", req.user);
+    console.log(
+      "Authenticated User ID:",
+      authenticatedUserId
+    );
 
-
-    // Create document with cleaned data
-    const salarySlip = new SalarySlipMonthWise({
-      ...data,
-      userId: req.user.id,
-    });
+    const salarySlip =
+      new SalarySlipMonthWise({
+        ...data,
+        userId: authenticatedUserId,
+      });
 
     await salarySlip.save();
 
@@ -71,9 +106,12 @@ console.log("Decoded User:", req.user);
       message: "Salary Slip Saved Successfully",
       data: salarySlip,
     });
-
   } catch (error) {
-    console.error("Mongoose Save Error Stack:", error); // Check your terminal to see this format
+    console.error(
+      "Mongoose Save Error Stack:",
+      error
+    );
+
     res.status(500).json({
       success: false,
       message: "Error Saving Salary Slip",
@@ -81,29 +119,38 @@ console.log("Decoded User:", req.user);
     });
   }
 });
+
 router.get(
   "/history",
   authMiddleware,
   async (req, res) => {
     try {
+      const authenticatedUserId =
+        req.user?._id ||
+        req.user?.id ||
+        req.user?.userId;
+
+      if (!authenticatedUserId) {
+        return res.status(400).json({
+          success: false,
+          message: "Authenticated user ID is missing",
+        });
+      }
 
       const history =
         await SalarySlipMonthWise.find({
-          userId: req.user.id,
+          userId: authenticatedUserId,
         }).sort({ createdAt: -1 });
 
       res.status(200).json({
         success: true,
         data: history,
       });
-
     } catch (error) {
-
       res.status(500).json({
         success: false,
         error: error.message,
       });
-
     }
   }
 );  

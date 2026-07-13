@@ -1,6 +1,7 @@
 import React from "react";
 
 const OtherIncome = ({
+  employeeDetails,
   otherIncome,
   setOtherIncome,
   additionalIncome,

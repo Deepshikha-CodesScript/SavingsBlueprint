@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const PersonalSalary = require("../models/PersonalSalary");
+const authMiddleware = require("../middleware/authMiddleware");
 
 
 // SAVE
-router.post("/save", async (req, res) => {
+router.post("/save", authMiddleware, async (req, res) => {
   try {
     const salary = new PersonalSalary(req.body);
 
@@ -26,7 +27,7 @@ router.post("/save", async (req, res) => {
 
 
 // UPDATE
-router.put("/update", async (req, res) => {
+router.put("/update", authMiddleware, async (req, res) => {
   try {
     const { empName, month } = req.body;
 
@@ -53,7 +54,7 @@ router.put("/update", async (req, res) => {
 
 
 // DELETE
-router.delete("/delete", async (req, res) => {
+router.delete("/delete", authMiddleware, async (req, res) => {
   try {
     const { empName, month } = req.body;
 
@@ -78,7 +79,7 @@ router.delete("/delete", async (req, res) => {
 
 
 // GET ALL
-router.get("/history", async (req, res) => {
+router.get("/history", authMiddleware, async (req, res) => {
   try {
     const data = await PersonalSalary.find();
 

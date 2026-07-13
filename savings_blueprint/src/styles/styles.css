@@ -4147,3 +4147,17 @@ font-size: 13px;
 .row-style-input[type=number] {
   -moz-appearance: textfield;
 }
+.advanced-income-table .row-style-input {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+.advanced-income-table .row-style-input.text-income {
+  color: #047857 !important;
+  -webkit-text-fill-color: #047857 !important;
+}
+.advanced-income-table .row-style-input.text-deduction {
+  color: #dc2626 !important;
+  -webkit-text-fill-color: #dc2626 !important;
+}

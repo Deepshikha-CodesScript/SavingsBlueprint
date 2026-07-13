@@ -4,9 +4,10 @@ import PersonalSalary from "./PersonalSalary";
 import OtherIncome from "./OtherIncome";
 import CapitalReceipt from "./CapitalReceipt";
 const SalarySlip = ({
-  formData,
-  handleChange,
+  employeeDetails,
+  handleEmployeeDetailsChange,
   annualIncomeData,
+  setAnnualIncomeData,
   earnings,
   deductions,
   handleEarningChange,
@@ -21,7 +22,7 @@ const SalarySlip = ({
   handleEdit,
   handleUpdate,
   handleDelete,
-  setFormData,
+  setEmployeeDetails,
   setEarnings,
   setSavedSalaryData,
   setDeductions
@@ -89,11 +90,11 @@ const SalarySlip = ({
    // Add this function to fetch capital receipt data
 const fetchCapitalReceipt = async () => {
   const config = getAuthConfig();
-  if (!config || !formData.empName || !formData.month) return;
+  if (!config || !employeeDetails.empName || !employeeDetails.month) return;
 
   try {
     const res = await axios.get(
-      `http://localhost:5000/api/capitalreceipt/get?empName=${encodeURIComponent(formData.empName)}&month=${encodeURIComponent(formData.month)}`,
+      `http://localhost:5000/api/capitalreceipt/get?empName=${encodeURIComponent(employeeDetails.empName)}&month=${encodeURIComponent(employeeDetails.month)}`,
       config
     );
     
@@ -117,18 +118,25 @@ const fetchCapitalReceipt = async () => {
 // ==========================
 const fetchPersonalSalary = async () => {
   const config = getAuthConfig();
-  if (!config || !formData.empName || !formData.month) return;
+  if (!config || !employeeDetails.empName || !employeeDetails.month) return;
 
   try {
     const res = await axios.get(
-      `http://localhost:5000/api/personalsalary/get?empName=${encodeURIComponent(formData.empName)}&month=${encodeURIComponent(formData.month)}`,
+      `http://localhost:5000/api/personalsalary/get?empName=${encodeURIComponent(employeeDetails.empName)}&month=${encodeURIComponent(employeeDetails.month)}`,
       config
     );
     
     if (res.data.success && res.data.data) {
       const data = res.data.data;
-      setPersonalSalary(data.personalSalary);
-      setOtherEarnings(data.otherEarnings || [{ label: "", amount: "" }]);
+      setPersonalSalary(prev => ({
+  ...prev,
+  ...(data.personalSalary || {})
+}));
+      setOtherEarnings(
+    data.otherEarnings?.length
+        ? data.otherEarnings
+        : [{ label: "", amount: "" }]
+);
       setOtherDeductions(data.otherDeductions || [{ label: "", amount: "" }]);
     }
   } catch (error) {
@@ -143,11 +151,11 @@ const fetchPersonalSalary = async () => {
 // ==========================
 const fetchOtherIncome = async () => {
   const config = getAuthConfig();
-  if (!config || !formData.empName || !formData.month) return;
+  if (!config || !employeeDetails.empName || !employeeDetails.month) return;
 
   try {
     const res = await axios.get(
-      `http://localhost:5000/api/otherincome/get?empName=${encodeURIComponent(formData.empName)}&month=${encodeURIComponent(formData.month)}`,
+      `http://localhost:5000/api/otherincome/get?empName=${encodeURIComponent(employeeDetails.empName)}&month=${encodeURIComponent(employeeDetails.month)}`,
       config
     );
     
@@ -163,14 +171,27 @@ const fetchOtherIncome = async () => {
   }
 };
 
+useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user) {
+        setEmployeeDetails((prev) => ({
+            ...prev,
+            empName: user.name,
+        }));
+    }
+}, []);
+
+
+
 // Combined useEffect to fetch all data
 useEffect(() => {
-  if (formData.empName && formData.month) {
+  if (employeeDetails.empName && employeeDetails.month) {
     fetchPersonalSalary();
     fetchOtherIncome();
     fetchCapitalReceipt();
   }
-}, [formData.empName, formData.month]);
+}, [employeeDetails.empName, employeeDetails.month]);
 
 
 
@@ -179,8 +200,7 @@ useEffect(() => {
     // Convert string numbers to actual numbers
     const parseNumber = (value) => {
       if (value === '' || value === null || value === undefined) return 0;
-      return typeof value === 'number' ? value : parseFloat(value) || 0;
-    };
+      return typeof value === 'number' ? value : parseFloat(value) || 0;    };
 
     // Clean earnings and deductions arrays
     const cleanArray = (arr) => {
@@ -194,22 +214,28 @@ useEffect(() => {
     };
 
     // Clean object values
-    const cleanObject = (obj) => {
-      if (!obj) return {};
-      const cleaned = {};
-      Object.keys(obj).forEach(key => {
-        cleaned[key] = parseNumber(obj[key]);
-      });
-      return cleaned;
-    };
+  const cleanObject = (obj) => {
+  if (!obj) return {};
+  const cleaned = {};
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key];
+    if (key === "expectedEndDate") {
+      cleaned[key] = value || null;
+    } else {
+      cleaned[key] = parseNumber(value);
+    }
+  });
+
+  return cleaned;
+};
 
     return {
-      empName: formData.empName?.trim() || '',
-      designation: formData.designation?.trim() || '',
-      department: formData.department?.trim() || '',
-      month: formData.month || '',
-      financialYear: formData.financialYear?.trim() || '',
-      retirementDate: formData.retirementDate || null,
+      empName: employeeDetails.empName?.trim() || '',
+      designation: employeeDetails.designation?.trim() || '',
+      department: employeeDetails.department?.trim() || '',
+      month: employeeDetails.month || '',
+      financialYear: employeeDetails.financialYear?.trim() || '',
+      retirementDate: employeeDetails.retirementDate || null,
       annualIncomeData: annualIncomeData || {},
       earnings: cleanArray(earnings),
       deductions: cleanArray(deductions),
@@ -229,18 +255,16 @@ useEffect(() => {
 
 
 
-  // Add this near the top of your component or in a separate file
-axios.interceptors.request.use(
-  (config) => {
-    console.log("Request URL:", config.url);
-    console.log("Request Headers:", config.headers);
-    console.log("Request Data:", config.data);
+useEffect(() => {
+  const interceptor = axios.interceptors.request.use(config => {
+    console.log(config.url);
     return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+  });
+
+  return () => {
+    axios.interceptors.request.eject(interceptor);
+  };
+}, []);
 
   // ==========================
   // PERSONAL SALARY ACTIONS - FIXED
@@ -248,15 +272,15 @@ axios.interceptors.request.use(
   const handlePersonalSave = async () => {const config = getAuthConfig();if (!config) {alert("Please login first");return;
     }
 
-    if (!formData.empName || !formData.month) {
+    if (!employeeDetails.empName || !employeeDetails.month) {
       alert("Employee Name and Month are required");
       return;
     }
 
     try {
       const payload = {
-        empName: formData.empName.trim(),
-        month: formData.month,
+        empName: employeeDetails.empName.trim(),
+        month: employeeDetails.month,
         personalSalary: cleanObject(personalSalary),
         otherEarnings: cleanArray(otherEarnings),
         otherDeductions: cleanArray(otherDeductions),
@@ -264,12 +288,73 @@ axios.interceptors.request.use(
 
       console.log("Saving Personal Salary:", payload);
       console.log("Token:", localStorage.getItem("token"));
-      const res = await axios.post(
-        "http://localhost:5000/api/personalsalary/save",
-        payload,
-        config
-      );
-      alert(res.data.message || "Personal Salary Saved Successfully");
+
+      // Try to save first, if data exists (409), update instead
+      let res;
+      try {
+        res = await axios.post(
+          "http://localhost:5000/api/personalsalary/save",
+          payload,
+          config
+        );
+        alert(res.data.message || "Personal Salary Saved Successfully");
+      } catch (saveError) {
+        if (saveError.response?.status === 409) {
+          console.log("Data already exists, updating instead...");
+          res = await axios.put(
+            "http://localhost:5000/api/personalsalary/update",
+            payload,
+            config
+          );
+          alert(res.data.message || "Personal Salary Updated Successfully");
+        } else {
+          throw saveError;
+        }
+      }
+
+     // Update annualIncomeData with Personal Salary + Other Earnings + Other Deductions
+const months = [
+  "Apr", "May", "Jun", "Jul",
+  "Aug", "Sep", "Oct", "Nov",
+  "Dec", "Jan", "Feb", "Mar"
+];
+
+const monthIndex = months.indexOf(employeeDetails.month);
+
+if (monthIndex !== -1) {
+  setAnnualIncomeData(prev => {
+    const updated = [...prev];
+
+    updated[monthIndex] = {
+      ...updated[monthIndex],
+
+      // Fixed Personal Salary fields
+      personalSalary: cleanObject(personalSalary),
+
+      // Dynamic Other Earnings
+      otherEarnings: Object.fromEntries(
+        otherEarnings
+          .filter(item => item.label?.trim())
+          .map(item => [
+            item.label.trim(),
+            Number(item.amount || 0)
+          ])
+      ),
+
+      // Dynamic Other Deductions
+      otherDeductions: Object.fromEntries(
+        otherDeductions
+          .filter(item => item.label?.trim())
+          .map(item => [
+            item.label.trim(),
+            Number(item.amount || 0)
+          ])
+      ),
+    };
+
+    return updated;
+  });
+}
     } catch (error) {
       console.error("Personal Salary Save Error:", error);
       handleApiError(error);
@@ -278,7 +363,17 @@ axios.interceptors.request.use(
   
 
   const handlePersonalEdit = () => {
-    alert("Personal Salary Edit Mode");
+    // Load data for the selected month from annualIncomeData
+    const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+    const monthIndex = months.indexOf(employeeDetails.month);
+
+    if (monthIndex !== -1 && annualIncomeData[monthIndex]) {
+      const monthData = annualIncomeData[monthIndex];
+      if (monthData.personalSalary) {
+        setPersonalSalary(monthData.personalSalary);
+      }
+    }
+    alert("Personal Salary data loaded for editing");
   };
 
   const handlePersonalUpdate = async () => {
@@ -292,8 +387,8 @@ axios.interceptors.request.use(
       const res = await axios.put(
         "http://localhost:5000/api/personalsalary/update",
         {
-          empName: formData.empName.trim(),
-          month: formData.month,
+          empName: employeeDetails.empName.trim(),
+          month: employeeDetails.month,
           personalSalary: cleanObject(personalSalary),
           otherEarnings: cleanArray(otherEarnings),
           otherDeductions: cleanArray(otherDeductions),
@@ -342,12 +437,12 @@ const checkTokenValidity = async () => {
 
     try {
       const res = await axios.delete(
-             `http://localhost:5000/api/personalsalary/delete?empName=${encodeURIComponent(formData.empName.trim())}&month=${encodeURIComponent(formData.month)}`,
+             `http://localhost:5000/api/personalsalary/delete?empName=${encodeURIComponent(employeeDetails.empName.trim())}&month=${encodeURIComponent(employeeDetails.month)}`,
         {
           headers: config.headers,
           data: {
-            empName: formData.empName.trim(),
-            month: formData.month,
+            empName: employeeDetails.empName.trim(),
+            month: employeeDetails.month,
           },
         }
       );
@@ -368,27 +463,58 @@ const checkTokenValidity = async () => {
       return;
     }
 
-    if (!formData.empName || !formData.month) {
+    if (!employeeDetails.empName || !employeeDetails.month) {
       alert("Employee Name and Month are required");
       return;
     }
 
     try {
       const payload = {
-        empName: formData.empName.trim(),
-        month: formData.month,
+        empName: employeeDetails.empName.trim(),
+        month: employeeDetails.month,
         otherIncome: cleanObject(otherIncome),
         additionalIncome: cleanArray(additionalIncome),
       };
 
       console.log("Saving Other Income:", payload);
 
-      const res = await axios.post(
-        "http://localhost:5000/api/otherincome/save",
-        payload,
-        config
-      );
-      alert(res.data.message || "Other Income Saved Successfully");
+      // Try to save first, if data exists (409), update instead
+      let res;
+      try {
+        res = await axios.post(
+          "http://localhost:5000/api/otherincome/save",
+          payload,
+          config
+        );
+        alert(res.data.message || "Other Income Saved Successfully");
+      } catch (saveError) {
+        if (saveError.response?.status === 409) {
+          console.log("Data already exists, updating instead...");
+          res = await axios.put(
+            "http://localhost:5000/api/otherincome/update",
+            payload,
+            config
+          );
+          alert(res.data.message || "Other Income Updated Successfully");
+        } else {
+          throw saveError;
+        }
+      }
+
+      // Update annualIncomeData with saved data
+      const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+      const monthIndex = months.indexOf(employeeDetails.month);
+
+      if (monthIndex !== -1) {
+        setAnnualIncomeData(prev => {
+          const updated = [...prev];
+          const monthIndex = months.indexOf(employeeDetails.month);
+          updated[monthIndex] = {
+                                ...updated[monthIndex],
+                                otherIncome: cleanObject(otherIncome)};
+          return updated;
+        });
+      }
     } catch (error) {
       console.error("Other Income Save Error:", error);
       handleApiError(error);
@@ -400,7 +526,17 @@ const checkTokenValidity = async () => {
   
 
   const handleOtherIncomeEdit = () => {
-    alert("Other Income Edit Mode");
+    // Load data for the selected month from annualIncomeData
+    const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+    const monthIndex = months.indexOf(employeeDetails.month);
+
+    if (monthIndex !== -1 && annualIncomeData[monthIndex]) {
+      const monthData = annualIncomeData[monthIndex];
+      if (monthData.otherIncome) {
+        setOtherIncome(monthData.otherIncome);
+      }
+    }
+    alert("Other Income data loaded for editing");
   };
 
   const handleOtherIncomeUpdate = async () => {
@@ -414,8 +550,8 @@ const checkTokenValidity = async () => {
       const res = await axios.put(
         "http://localhost:5000/api/otherincome/update",
         {
-          empName: formData.empName.trim(),
-          month: formData.month,
+          empName: employeeDetails.empName.trim(),
+          month: employeeDetails.month,
           otherIncome: cleanObject(otherIncome),
           additionalIncome: cleanArray(additionalIncome),
         },
@@ -441,8 +577,8 @@ const checkTokenValidity = async () => {
         {
           headers: config.headers,
           data: {
-            empName: formData.empName.trim(),
-            month: formData.month,
+            empName: employeeDetails.empName.trim(),
+            month: employeeDetails.month,
           },
         }
       );
@@ -460,23 +596,66 @@ const checkTokenValidity = async () => {
 const handleCapitalReceiptSave = async () => {
   const config = getAuthConfig();
   if (!config) {alert("Please login first");return;}
-  if (!formData.empName || !formData.month) {alert("Employee Name and Month are required");return;}
+  if (!employeeDetails.empName || !employeeDetails.month) {alert("Employee Name and Month are required");return;}
   try {
     const payload = {
-      empName: formData.empName.trim(),
-      month: formData.month,
+      empName: employeeDetails.empName.trim(),
+      month: employeeDetails.month,
       capitalReceipt: cleanObject(capitalReceipt),
-      additionalCapitalReceipts: cleanArray(additionalCapitalReceipts),
+    
+
+  additionalCapitalReceipts: Object.fromEntries(
+    additionalCapitalReceipts
+      .filter(item => item.label?.trim())
+      .map(item => [
+        item.label.trim(),
+        Number(item.amount || 0)
+      ])
+  )
     };
     console.log("Saving Capital Receipt:", payload);
-    const res = await axios.post(
-      "http://localhost:5000/api/capitalreceipt/save",
-      payload,
-      config
-    );
-    alert(res.data.message || "Capital Receipt Saved Successfully");
-    // Refresh data after save
-    await fetchCapitalReceipt();
+
+    // Try to save first, if data exists (409), update instead
+    let res;
+    try {
+      res = await axios.post(
+        "http://localhost:5000/api/capitalreceipt/save",
+        payload,
+        config
+      );
+      alert(res.data.message || "Capital Receipt Saved Successfully");
+    } catch (saveError) {
+      if (saveError.response?.status === 409) {
+        console.log("Data already exists, updating instead...");
+        res = await axios.put(
+          "http://localhost:5000/api/capitalreceipt/update",
+          payload,
+          config
+        );
+        alert(res.data.message || "Capital Receipt Updated Successfully");
+      } else {
+        throw saveError;
+      }
+    }
+
+   const months = [
+  "Apr", "May", "Jun", "Jul",
+  "Aug", "Sep", "Oct", "Nov",
+  "Dec", "Jan", "Feb", "Mar"
+];
+
+const monthIndex = months.indexOf(employeeDetails.month);
+
+    if (monthIndex !== -1) {
+      setAnnualIncomeData(prev => {
+        const updated = [...prev];
+        updated[monthIndex] = {
+          ...updated[monthIndex],
+          capitalReceipt: cleanObject(capitalReceipt),
+        };
+        return updated;
+      });
+    }
   } catch (error) {
     console.error("Capital Receipt Save Error:", error);
      if (error.response) {
@@ -489,7 +668,17 @@ const handleCapitalReceiptSave = async () => {
   }
 };
 const handleCapitalReceiptEdit = () => {
-  alert("Capital Receipt Edit Mode");
+  // Load data for the selected month from annualIncomeData
+  const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
+  const monthIndex = months.indexOf(employeeDetails.month);
+
+  if (monthIndex !== -1 && annualIncomeData[monthIndex]) {
+    const monthData = annualIncomeData[monthIndex];
+    if (monthData.capitalReceipt) {
+      setCapitalReceipt(monthData.capitalReceipt);
+    }
+  }
+  alert("Capital Receipt data loaded for editing");
 };
 const handleCapitalReceiptUpdate = async () => {
   const config = getAuthConfig();
@@ -501,8 +690,8 @@ const handleCapitalReceiptUpdate = async () => {
     const res = await axios.put(
       "http://localhost:5000/api/capitalreceipt/update",
       {
-        empName: formData.empName.trim(),
-        month: formData.month,
+        empName: employeeDetails.empName.trim(),
+        month: employeeDetails.month,
         capitalReceipt: cleanObject(capitalReceipt),
         additionalCapitalReceipts: cleanArray(additionalCapitalReceipts),
       },
@@ -520,13 +709,13 @@ const handleCapitalReceiptDelete = async () => {
     alert("Please login first");
     return;
   }
-  if (!formData.empName || !formData.month) {
+  if (!employeeDetails.empName || !employeeDetails.month) {
     alert("Employee Name and Month are required");
     return;
   }
   try {
     const res = await axios.delete(
-      `http://localhost:5000/api/capitalreceipt/delete?empName=${encodeURIComponent(formData.empName.trim())}&month=${encodeURIComponent(formData.month)}`,
+      `http://localhost:5000/api/capitalreceipt/delete?empName=${encodeURIComponent(employeeDetails.empName.trim())}&month=${encodeURIComponent(employeeDetails.month)}`,
       config
     );
     alert(res.data.message || "Capital Receipt Deleted Successfully");
@@ -560,7 +749,7 @@ const handleCapitalReceiptDelete = async () => {
 
     // Validate required fields
     const requiredFields = ['empName', 'month', 'financialYear', 'designation'];
-    const missingFields = requiredFields.filter(field => !formData[field] || formData[field].trim() === '');
+    const missingFields = requiredFields.filter(field => !employeeDetails[field] || employeeDetails[field].trim() === '');
     
     if (missingFields.length > 0) {
       alert(`Missing required fields: ${missingFields.join(', ')}`);
@@ -568,14 +757,43 @@ const handleCapitalReceiptDelete = async () => {
     }
 
     // Prepare the payload with proper data types
-    const payload = preparePayload();
-    
+   // Get logged-in user
+const user = JSON.parse(localStorage.getItem("user"));
+
+const userId =
+  user?._id ||
+  user?.id ||
+  user?.userId ||
+  localStorage.getItem("userId");
+
+console.log("Stored user:", user);
+console.log("Resolved userId:", userId);
+
+if (!userId) {
+  alert("User ID is missing. Please log out and log in again.");
+  return;
+}
+
+const payload = {
+  ...preparePayload(),
+  userId,
+};
+    console.log("Logged-in user:", user);
+    console.log("User ID being sent:", payload.userId);
     console.log("=== SENDING PAYLOAD TO SERVER ===");
     console.log("Payload:", JSON.stringify(payload, null, 2));
     console.log("==================================");
 
     setIsSaving(true);
+    
+    if (!payload.userId) {
+  console.error("User ID is missing:", user);
+  alert("User ID is missing. Please log out and log in again.");
+  return;
+}
 
+console.log("Final salary payload:");
+console.log(JSON.stringify(payload, null, 2));
     try {
       const res = await axios.post(
         "http://localhost:5000/api/salaryslip/save",
@@ -585,6 +803,83 @@ const handleCapitalReceiptDelete = async () => {
 
       console.log("Save Response:", res.data);
       alert(res.data.message || "Salary Slip Saved Successfully!");
+
+      const months = [
+  "Apr", "May", "Jun", "Jul",
+  "Aug", "Sep", "Oct", "Nov",
+  "Dec", "Jan", "Feb", "Mar"
+];
+
+const monthIndex = months.indexOf(employeeDetails.month);
+
+if (monthIndex !== -1) {
+  setAnnualIncomeData(prev => {
+    const updated = [...prev];
+
+    updated[monthIndex] = {
+      ...updated[monthIndex],
+
+      earnings: Object.fromEntries(
+        earnings.map(item => [
+          item.label,
+          Number(item.amount || 0)
+        ])
+      ),
+
+      deductions: Object.fromEntries(
+        deductions.map(item => [
+          item.label,
+          Number(item.amount || 0)
+        ])
+      ),
+
+      personalSalary: cleanObject(personalSalary),
+      
+
+    otherEarnings: Object.fromEntries(
+        otherEarnings
+            .filter(item => item.label?.trim())
+            .map(item => [
+                item.label.trim(),
+                Number(item.amount || 0)
+            ])
+    ),
+
+    otherDeductions: Object.fromEntries(
+        otherDeductions
+            .filter(item => item.label?.trim())
+            .map(item => [
+                item.label.trim(),
+                Number(item.amount || 0)
+            ])
+    ),
+
+      otherIncome: cleanObject(otherIncome),
+
+       additionalIncome: Object.fromEntries(
+    additionalIncome
+      .filter(item => item.label?.trim())
+      .map(item => [
+        item.label.trim(),
+        Number(item.amount || 0)
+      ])
+  ),
+
+      capitalReceipt: cleanObject(capitalReceipt),
+
+      taxExemption:
+        updated[monthIndex]?.taxExemption || {},
+
+      grossEarnings,
+
+      totalDeductions,
+
+      netPay
+    };
+
+    return updated;
+  });
+}
 
       // Fetch updated history using the same config
       try {
@@ -626,9 +921,15 @@ const handleCapitalReceiptDelete = async () => {
       return typeof value === 'number' ? value : parseFloat(value) || 0;
     };
     const cleaned = {};
-    Object.keys(obj).forEach(key => {
-      cleaned[key] = parseNumber(obj[key]);
-    });
+      Object.keys(obj).forEach((key) => {
+    if (key === "expectedEndDate") {
+      cleaned[key] = obj[key] || "";
+    } else if (key === "annualGrowthRate") {
+      cleaned[key] = Number(obj[key] || 0);
+    } else {
+      cleaned[key] = Number(obj[key] || 0);
+    }
+  });
     return cleaned;
   };
 
@@ -646,46 +947,45 @@ const handleCapitalReceiptDelete = async () => {
       }));
   };
 
-  const handleApiError = (error) => {
-    if (error.response) {
-      console.error("Status Code:", error.response.status);
-      console.error("Response Data:", error.response.data);
-      
-      if (error.response.status === 401) {
-        alert("Session expired. Please login again.");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      } else if (error.response.status === 400) {
-        const errorMsg = error.response.data.message || 
-                        error.response.data.error || 
-                        "Invalid data format";
-        alert(`Validation Error: ${errorMsg}`);
-      } else if (error.response.status === 409) {
-        alert("Duplicate entry. This record already exists.");
-      } else {
-        const errorMsg = error.response.data.message || 
-                        error.response.data.error || 
-                        "Server error occurred";
-        alert(`Error (${error.response.status}): ${errorMsg}`);
-      }
-    } else if (error.request) {
-      console.error("No response from server");
-      alert("Server not responding. Please check if backend is running on port 5000.");
-    } else {
-      console.error("Request setup error:", error.message);
-      alert(`Error: ${error.message}`);
-    }
-  };
+const handleApiError = (error) => {
+  console.error("=== API ERROR ===");
+
+  if (error.response) {
+    console.error("Status Code:", error.response.status);
+    console.error(
+      "Response Data:",
+      JSON.stringify(error.response.data, null, 2)
+    );
+
+    const message =
+      error.response.data?.message ||
+      error.response.data?.error ||
+      error.response.data?.details ||
+      "Internal Server Error";
+
+    alert(`Save failed: ${message}`);
+  } else if (error.request) {
+    console.error("No server response:", error.request);
+    alert("Server is not responding.");
+  } else {
+    console.error("Request error:", error.message);
+    alert(`Request error: ${error.message}`);
+  }
+};
 
   const resetForm = () => {
-    setFormData({
-      empName: "",
-      designation: "",
-      department: "",
-      month: "",
-      financialYear: "",
-      retirementDate: "",
-    });
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log(JSON.parse(localStorage.getItem("user")));
+
+setEmployeeDetails({
+  empCode: "",
+  empName: user?.name || "", // ✅ keep logged-in user's name
+  designation: "",
+  department: "",
+  financialYear: "",
+  month: "",
+  retirementDate: "",
+});
     setEarnings([{ label: "", amount: "" }]);
     setDeductions([{ label: "", amount: "" }]);
     setPersonalSalary({
@@ -747,22 +1047,22 @@ const handleCapitalReceiptDelete = async () => {
         <div className="info-column">
           <p>
             <strong>Emp Name:</strong>
-            <input type="text" name="empName" value={formData.empName} onChange={handleChange} placeholder="Employee Name" />
+            <input type="text" name="empName" value={employeeDetails.empName} onChange={handleEmployeeDetailsChange} placeholder="Employee Name" readOnly/>
           </p>
           <p>
             <strong>Designation:</strong>
-            <input type="text" name="designation" value={formData.designation} onChange={handleChange} placeholder="e.g. Manager" />
+            <input type="text" name="designation" value={employeeDetails.designation} onChange={handleEmployeeDetailsChange} placeholder="e.g. Manager" />
           </p>
           <p>
             <strong>Department / Company:</strong>
-            <input type="text" name="department" value={formData.department} onChange={handleChange} placeholder="e.g. SCCL" />
+            <input type="text" name="department" value={employeeDetails.department} onChange={handleEmployeeDetailsChange} placeholder="e.g. SCCL" />
           </p>
         </div>
 
         <div className="info-column">
           <p>
             <strong>Month:</strong>
-            <select name="month" value={formData.month} onChange={handleChange}>
+            <select name="month" value={employeeDetails.month} onChange={handleEmployeeDetailsChange}>
               <option value="">Select Month</option>
               <option value="Apr">Apr</option>
               <option value="May">May</option>
@@ -780,11 +1080,11 @@ const handleCapitalReceiptDelete = async () => {
           </p>
           <p>
             <strong>Financial Year:</strong>
-            <input type="text" name="financialYear" value={formData.financialYear} onChange={handleChange} placeholder="e.g. 2026-27" />
+            <input type="text" name="financialYear" value={employeeDetails.financialYear} onChange={handleEmployeeDetailsChange} placeholder="e.g. 2026-27" />
           </p>
           <p>
             <strong>Retirement Date:</strong>
-            <input type="date" name="retirementDate" value={formData.retirementDate} onChange={handleChange} />
+            <input type="date" name="retirementDate" value={employeeDetails.retirementDate} onChange={handleEmployeeDetailsChange} />
           </p>
         </div>
       </div>
@@ -873,6 +1173,7 @@ const handleCapitalReceiptDelete = async () => {
       <div className="section-card">
         <h3 className="section-title">Personal Salary</h3>
         <PersonalSalary
+          employeeDetails={employeeDetails}
           personalSalary={personalSalary}
           setPersonalSalary={setPersonalSalary}
           otherEarnings={otherEarnings}
@@ -892,6 +1193,7 @@ const handleCapitalReceiptDelete = async () => {
       <div className="section-card">
         <h3 className="section-title">Other Income</h3>
         <OtherIncome
+          employeeDetails={employeeDetails}
           otherIncome={otherIncome}
           setOtherIncome={setOtherIncome}
           additionalIncome={additionalIncome}
@@ -909,6 +1211,7 @@ const handleCapitalReceiptDelete = async () => {
       <div className="section-card">
         <h3 className="section-title">Capital Receipt</h3>
         <CapitalReceipt
+          employeeDetails={employeeDetails}
           capitalReceipt={capitalReceipt}
           setCapitalReceipt={setCapitalReceipt}
           additionalCapitalReceipts={additionalCapitalReceipts}

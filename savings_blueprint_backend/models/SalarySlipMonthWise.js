@@ -23,13 +23,11 @@ const SalarySlipSchema = new mongoose.Schema(
       exgratia: Number,
       arrears: Number,
       loanTaken: Number,
-
       loanRepayment: Number,
       licPremium: Number,
       houseLoanEMI: Number,
       vehicleLoanEMI: Number,
       otherDeduction: Number,
-
       expectedEndDate: Date,
       annualGrowthRate: Number,
     },

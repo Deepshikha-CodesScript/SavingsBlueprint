@@ -1,6 +1,7 @@
 import React from "react";
 
 const CapitalReceipt = ({
+  employeeDetails,
   capitalReceipt,
   setCapitalReceipt,
   additionalCapitalReceipts,
